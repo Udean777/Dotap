@@ -33,6 +33,9 @@ class OverlayController(
     var gestureEngine: GestureEngine? = null
     var accessibilityClick: (() -> Unit)? = null
 
+    /** Called when the dot settles after a drag so the service can persist the position. */
+    var onPositionSettled: ((isRightSide: Boolean, yRatio: Float) -> Unit)? = null
+
     private var currentDragX = 0f
     private var currentDragY = 0f
 
@@ -66,7 +69,7 @@ class OverlayController(
         val screenSize = getScreenSize(windowManager)
         val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
         params.y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
-        params.x = if (state.isRightSide) screenSize.x - dotSizePx else 0
+        params.x = resolveX(state, dotSizePx, screenSize)
 
         try {
             windowManager.updateViewLayout(view, params)
@@ -103,7 +106,7 @@ class OverlayController(
 
         val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
         params.y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
-        params.x = if (state.isRightSide) screenSize.x - dotSizePx else 0
+        params.x = resolveX(state, dotSizePx, screenSize)
 
         try {
             windowManager.updateViewLayout(view, params)
@@ -141,33 +144,31 @@ class OverlayController(
     fun onDragEnd() {
         val params = layoutParams ?: return
         val view = dotView ?: return
-        val screenSize = getScreenSize(windowManager)
-        val dotSizePx = view.width
-        val startX = params.x
-        val isRight = (startX + dotSizePx / 2) >= screenSize.x / 2
-        val targetX = if (isRight) screenSize.x - dotSizePx else 0
-        val maxY = (screenSize.y - dotSizePx).coerceAtLeast(1)
-        val yRatio = (params.y.toFloat() / maxY).coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO)
+        val metrics = measureDrag(view, params, windowManager)
 
         snapAnimator?.cancel()
-        val animator = ValueAnimator.ofInt(startX, targetX)
-        animator.duration = SNAP_ANIMATION_DURATION_MS
-        animator.interpolator = DecelerateInterpolator()
-        animator.addUpdateListener { valueAnimator ->
-            params.x = valueAnimator.animatedValue as Int
-            try {
-                windowManager.updateViewLayout(view, params)
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Error during snap animation", e)
+        snapAnimator = null
+
+        if (presenter.uiState.value.isSnapToEdgeEnabled) {
+            val animator = createSnapAnimator(metrics, windowManager) {
+                snapAnimator = null
+                presenter.updatePosition(
+                    isRightSide = metrics.isRight,
+                    yRatio = metrics.yRatio,
+                    xRatio = if (metrics.isRight) 1f else 0f,
+                )
+                onPositionSettled?.invoke(metrics.isRight, metrics.yRatio)
             }
+            snapAnimator = animator
+            animator.start()
+        } else {
+            presenter.updatePosition(
+                isRightSide = metrics.isRight,
+                yRatio = metrics.yRatio,
+                xRatio = metrics.xRatio,
+            )
+            onPositionSettled?.invoke(metrics.isRight, metrics.yRatio)
         }
-        // Publish the new position only once settled, otherwise the state collector jumps the dot mid-animation.
-        animator.doOnEnd {
-            snapAnimator = null
-            presenter.updatePosition(isRightSide = isRight, yRatio = yRatio)
-        }
-        snapAnimator = animator
-        animator.start()
     }
 
     override fun hideForCapture() {
@@ -185,11 +186,6 @@ class OverlayController(
             MessageType.SCREENSHOT_UNAVAILABLE -> R.string.screenshot_unavailable
         }
         Toast.makeText(context, textRes, Toast.LENGTH_SHORT).show()
-    }
-
-    companion object {
-        private const val TAG = "OverlayController"
-        private const val SNAP_ANIMATION_DURATION_MS = 250L
     }
 }
 
@@ -256,9 +252,74 @@ private fun buildLayoutParams(
         PixelFormat.TRANSLUCENT,
     ).apply {
         gravity = Gravity.TOP or Gravity.START
-        x = if (state.isRightSide) screenSize.x - dotSizePx else 0
+        x = resolveX(state, dotSizePx, screenSize)
         y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
     }
 }
 
+private fun resolveX(state: DotUiState, dotSizePx: Int, screenSize: Point): Int {
+    val maxX = (screenSize.x - dotSizePx).coerceAtLeast(0)
+    return when {
+        state.isSnapToEdgeEnabled && state.isRightSide -> maxX
+        state.isSnapToEdgeEnabled -> 0
+        else -> (maxX * state.xRatio).toInt().coerceIn(0, maxX)
+    }
+}
+
 private fun Context.dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
+
+private fun measureDrag(
+    view: View,
+    params: WindowManager.LayoutParams,
+    windowManager: WindowManager,
+): DragMetrics {
+    val screenSize = getScreenSize(windowManager)
+    val dotSizePx = view.width
+    val startX = params.x
+    val maxX = (screenSize.x - dotSizePx).coerceAtLeast(1)
+    val maxY = (screenSize.y - dotSizePx).coerceAtLeast(1)
+    val isRight = (startX + dotSizePx / 2) >= screenSize.x / 2
+    return DragMetrics(
+        view = view,
+        params = params,
+        startX = startX,
+        isRight = isRight,
+        xRatio = (startX.toFloat() / maxX).coerceIn(0f, 1f),
+        yRatio = (params.y.toFloat() / maxY).coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO),
+        targetX = if (isRight) screenSize.x - dotSizePx else 0,
+    )
+}
+
+private fun createSnapAnimator(
+    metrics: DragMetrics,
+    windowManager: WindowManager,
+    onSettled: () -> Unit,
+): ValueAnimator {
+    val animator = ValueAnimator.ofInt(metrics.startX, metrics.targetX)
+    animator.duration = SNAP_ANIMATION_DURATION_MS
+    animator.interpolator = DecelerateInterpolator()
+    animator.addUpdateListener { valueAnimator ->
+        metrics.params.x = valueAnimator.animatedValue as Int
+        try {
+            windowManager.updateViewLayout(metrics.view, metrics.params)
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Error during snap animation", e)
+        }
+    }
+    // Publish the new position only once settled, otherwise the state collector jumps the dot mid-animation.
+    animator.doOnEnd { onSettled() }
+    return animator
+}
+
+private const val TAG = "OverlayController"
+private const val SNAP_ANIMATION_DURATION_MS = 250L
+
+private data class DragMetrics(
+    val view: View,
+    val params: WindowManager.LayoutParams,
+    val startX: Int,
+    val targetX: Int,
+    val isRight: Boolean,
+    val xRatio: Float,
+    val yRatio: Float,
+)

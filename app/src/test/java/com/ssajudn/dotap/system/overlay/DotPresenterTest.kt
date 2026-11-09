@@ -133,6 +133,46 @@ class DotPresenterTest {
     }
 
     @Test
+    fun `applySettings updates visibility, size, position and snapping`() = runTest {
+        val presenter = DotPresenter()
+        presenter.uiState.test {
+            awaitItem()
+
+            presenter.applySettings(
+                DotSettings(
+                    isDotEnabled = false,
+                    dotSizeDp = 999,
+                    isRightSide = false,
+                    yRatio = 0.9f,
+                    isSnapToEdgeEnabled = false,
+                ),
+            )
+
+            val state = awaitItem()
+            assertFalse(state.isVisible)
+            assertEquals(Limits.MAX_DOT_SIZE_DP, state.dotSizeDp)
+            assertFalse(state.isRightSide)
+            assertEquals(0.9f, state.yRatio, 0.001f)
+            assertFalse(state.isSnapToEdgeEnabled)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `applySettings with snapping off keeps a free x position`() = runTest {
+        val presenter = DotPresenter()
+        presenter.updatePosition(isRightSide = false, yRatio = 0.4f, xRatio = 0.3f)
+        presenter.uiState.test {
+            awaitItem()
+
+            presenter.applySettings(DotSettings(isSnapToEdgeEnabled = false))
+
+            assertEquals(0.3f, awaitItem().xRatio, 0.001f)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `overlapping gestures run one action at a time`() = runTest {
         val performer = CountingActionPerformer()
         val useCase = HandleGestureUseCase(

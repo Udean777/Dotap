@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ServiceStatus
+import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
 @Composable
@@ -86,6 +87,12 @@ private fun HomeBody(
         StatusCard(
             serviceStatus = state.serviceStatus,
             onEnableClicked = { onEvent(HomeUiEvent.OpenAccessibilitySettingsClicked) },
+        )
+
+        LabeledSwitchRow(
+            label = stringResource(R.string.dot_visibility_label),
+            checked = state.isDotEnabled,
+            onCheckedChange = { onEvent(HomeUiEvent.DotVisibilityToggled(it)) },
         )
 
         Spacer(modifier = Modifier.weight(1f))

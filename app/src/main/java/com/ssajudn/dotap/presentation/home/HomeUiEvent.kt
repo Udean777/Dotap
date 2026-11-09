@@ -4,4 +4,6 @@ sealed interface HomeUiEvent {
     data object OpenSettingsClicked : HomeUiEvent
 
     data object OpenAccessibilitySettingsClicked : HomeUiEvent
+
+    data class DotVisibilityToggled(val enabled: Boolean) : HomeUiEvent
 }

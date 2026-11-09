@@ -250,9 +250,9 @@ Standard MVVM as in section 4. ViewModels are created through factories in `AppC
 A `Service` has no `ViewModelStore`, so the overlay uses the **same contract** with plain classes:
 
 - `DotUiState` (immutable): visible, side, y-ratio, size, alpha, hiddenForCapture.
-- `DotPresenter` (plain class, scoped to the service coroutine scope): collects `SettingsRepository.settings`, owns `StateFlow<DotUiState>`, receives gesture callbacks from `GestureEngine`, calls `HandleGestureUseCase`, and updates position on drag.
+- `DotPresenter` (plain class, scoped to the service coroutine scope): owns `StateFlow<DotUiState>`, receives gesture callbacks from `GestureEngine`, calls `HandleGestureUseCase`, and updates position on drag. The service collects `SettingsRepository.settings` and calls `DotPresenter.applySettings`.
 - `DotView` (plain `View`): **renders** `DotUiState`, forwards raw touch events. No decisions.
-- `OverlayController`: the `WindowManager` adapter. Adds/removes/updates the window, applies exclusion rects, implements `OverlayVisibility`.
+- `OverlayController`: the `WindowManager` adapter. Adds/removes/updates the window, applies exclusion rects, implements `OverlayVisibility`, and reports settled positions through `onPositionSettled` so the service can persist them.
 
 The **panel** is Compose, so it can use a real `PanelViewModel`:
 

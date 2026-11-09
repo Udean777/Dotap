@@ -37,11 +37,11 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 
 ## M3 — Settings and persistence (FR-11, FR-43)
 
-- [ ] **M3.1** `DotSettings` model with validation (`Defaults`, `Limits`, `with...` clamping methods) and the `SettingsRepository` interface in `domain`; `DataStoreSettingsRepository` and `SettingsMapper` in `data` with the keys and defaults in `ARCHITECTURE.md`.
+- [x] **M3.1** `DotSettings` model with validation (`Defaults`, `Limits`, `with...` clamping methods) and the `SettingsRepository` interface in `domain`; `DataStoreSettingsRepository` and `SettingsMapper` in `data` with the keys and defaults in `ARCHITECTURE.md`.
   *Accept:* tests cover defaults, clamping, unknown stored values, and a round trip through a temp-file DataStore.
-- [ ] **M3.2** Service collects settings and applies them live (timeouts, assigned actions, haptics, dot position persisted across restarts).
+- [x] **M3.2** Service collects settings and applies them live (timeouts, assigned actions, haptics, dot position persisted across restarts).
   *Accept:* changing a setting changes behavior without restarting the service; dot position survives app and device restart.
-- [ ] **M3.3** MVVM settings and home screens: `SettingsViewModel`/`HomeViewModel` with `UiState`, `UiEvent`, and `UiEffect`; Route + stateless Screen with `@Preview`; Gestures (action dropdowns, timeouts), haptics and snap-to-edge toggles; dot visibility toggle. (Size and idle-opacity controls are added in M4.3.) Navigation Compose wiring.
+- [x] **M3.3** MVVM settings and home screens: `SettingsViewModel`/`HomeViewModel` with `UiState`, `UiEvent`, and `UiEffect`; Route + stateless Screen with `@Preview`; Gestures (action dropdowns, timeouts), haptics and snap-to-edge toggles; dot visibility toggle. (Size and idle-opacity controls are added in M4.3.) Navigation Compose wiring.
   *Accept:* ViewModel unit tests (fake repository, Turbine) pass; all controls have content descriptions; values are validated in the domain model; changes apply live.
 
 ## M4 — Quick-action panel (FR-30, FR-31, FR-33)

@@ -1,5 +1,6 @@
 package com.ssajudn.dotap.system.overlay
 
+import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.GestureType
 import com.ssajudn.dotap.domain.model.Limits
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
@@ -42,11 +43,29 @@ class DotPresenter(
         _uiState.value = _uiState.value.copy(isHiddenForCapture = hidden)
     }
 
-    fun updatePosition(isRightSide: Boolean, yRatio: Float) {
+    fun updatePosition(isRightSide: Boolean, yRatio: Float, xRatio: Float = if (isRightSide) 1f else 0f) {
         val clampedRatio = yRatio.coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO)
         _uiState.value = _uiState.value.copy(
             isRightSide = isRightSide,
             yRatio = clampedRatio,
+            xRatio = xRatio.coerceIn(0f, 1f),
+        )
+    }
+
+    fun applySettings(settings: DotSettings) {
+        val current = _uiState.value
+        _uiState.value = current.copy(
+            isVisible = settings.isDotEnabled,
+            dotSizeDp = settings.dotSizeDp.coerceIn(Limits.MIN_DOT_SIZE_DP, Limits.MAX_DOT_SIZE_DP),
+            isRightSide = settings.isRightSide,
+            yRatio = settings.yRatio.coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO),
+            isSnapToEdgeEnabled = settings.isSnapToEdgeEnabled,
+            // With snapping on the side decides the position; with it off keep where the user left the dot.
+            xRatio = if (settings.isSnapToEdgeEnabled) {
+                if (settings.isRightSide) 1f else 0f
+            } else {
+                current.xRatio
+            },
         )
     }
 

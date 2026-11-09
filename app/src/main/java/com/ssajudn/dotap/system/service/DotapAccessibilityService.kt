@@ -26,6 +26,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class DotapAccessibilityService : AccessibilityService() {
 
@@ -51,9 +52,18 @@ class DotapAccessibilityService : AccessibilityService() {
         controller.show()
 
         dotPresenter.uiState.onEach { controller.update(it) }.launchIn(scope)
-        app.container.settingsRepository.settings
-            .onEach { updateEngineConfig(gestureEngine, it, touchSlopPx) }
+        val settingsRepository = app.container.settingsRepository
+        settingsRepository.settings
+            .onEach {
+                updateEngineConfig(gestureEngine, it, touchSlopPx)
+                dotPresenter.applySettings(it)
+            }
             .launchIn(scope)
+        controller.onPositionSettled = { isRightSide, yRatio ->
+            scope.launch {
+                settingsRepository.update { it.copy(isRightSide = isRightSide, yRatio = yRatio) }
+            }
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

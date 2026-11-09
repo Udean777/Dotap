@@ -10,6 +10,24 @@
     <string name="dot_content_description">Dot melayang</string>
     <string name="settings_button">Pengaturan</string>
 
+    <string name="settings_title">Pengaturan</string>
+    <string name="back_button">Kembali</string>
+    <string name="settings_feedback_section">Umpan Balik</string>
+    <string name="settings_behavior_section">Perilaku</string>
+    <string name="haptics_label">Umpan balik haptic</string>
+    <string name="gestures_title">Gestur</string>
+    <string name="gestures_summary">Aksi untuk tiap gestur dan waktunya</string>
+    <string name="appearance_title">Tampilan</string>
+    <string name="appearance_summary">Visibilitas dot dan penempelan ke tepi</string>
+    <string name="gesture_single_tap_label">Ketuk sekali</string>
+    <string name="gesture_double_tap_label">Ketuk dua kali</string>
+    <string name="gesture_long_press_label">Tekan lama</string>
+    <string name="double_tap_timeout_label">Batas waktu ketuk dua kali</string>
+    <string name="long_press_duration_label">Durasi tekan lama</string>
+    <string name="timeout_value">%1$d ms</string>
+    <string name="dot_visibility_label">Tampilkan dot melayang</string>
+    <string name="snap_to_edge_label">Tempel ke tepi layar</string>
+
     <string name="action_screenshot">Tangkapan Layar</string>
     <string name="action_home">Home</string>
     <string name="action_back">Kembali</string>

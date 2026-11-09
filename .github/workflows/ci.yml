@@ -4,19 +4,25 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
+      - dev
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build-and-verify:
     name: Build & Verify
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -32,19 +38,19 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run Spotless Check
-        run: ./gradlew spotlessCheck
+        run: ./gradlew spotlessCheck --no-daemon
 
       - name: Run Detekt
-        run: ./gradlew detekt
+        run: ./gradlew detekt --no-daemon
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testDebugUnitTest --no-daemon
 
       - name: Run Android Lint
-        run: ./gradlew lintDebug
+        run: ./gradlew lintDebug --no-daemon
 
       - name: Assemble Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload Test Reports
         if: failure()

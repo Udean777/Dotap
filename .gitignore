@@ -2,6 +2,7 @@
 .gradle/
 build/
 **/build/
+dist/
 *.apk
 *.ap_
 *.aab
@@ -10,6 +11,8 @@ build/
 
 # Local configuration and credentials
 local.properties
+keystore.properties
+keystores/
 *.jks
 *.keystore
 signing.properties

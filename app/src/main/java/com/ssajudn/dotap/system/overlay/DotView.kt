@@ -15,8 +15,13 @@ import com.ssajudn.dotap.R
 class DotView(
     context: Context,
     private val onTouchListener: (View, MotionEvent) -> Boolean = { _, _ -> false },
-    private val onClickAction: () -> Unit = {},
+    private val actions: ClickActions = ClickActions(),
 ) : View(context) {
+
+    data class ClickActions(
+        val onClick: () -> Unit = {},
+        val onLongClick: () -> Unit = {},
+    )
 
     private val outerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -39,17 +44,23 @@ class DotView(
     init {
         contentDescription = context.getString(R.string.dot_content_description)
         isClickable = true
-        isFocusable = false
+        isLongClickable = true
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
     fun render(state: DotUiState) {
+        animate().cancel()
         if (!state.isVisible || state.isHiddenForCapture) {
             visibility = GONE
             alpha = 0f
             updateExclusionRects(false)
         } else {
             visibility = VISIBLE
-            alpha = state.alpha
+            if (state.alpha >= 1f || alpha == 0f) {
+                alpha = state.alpha
+            } else {
+                animate().alpha(state.alpha).setDuration(FADE_DURATION_MS).start()
+            }
             updateExclusionRects(true)
         }
         invalidate()
@@ -92,13 +103,20 @@ class DotView(
     // TalkBack activation must trigger the single-tap action, which raw touch handling alone never reaches.
     override fun performClick(): Boolean {
         super.performClick()
-        onClickAction()
+        actions.onClick()
+        return true
+    }
+
+    override fun performLongClick(): Boolean {
+        super.performLongClick()
+        actions.onLongClick()
         return true
     }
 
     private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density
 
     companion object {
+        private const val FADE_DURATION_MS = 250L
         private const val OUTER_RING_STROKE_DP = 1.5f
         private const val RING_RATIO = 0.72f
         private const val CENTER_DOT_RATIO = 0.35f

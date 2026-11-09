@@ -3,18 +3,22 @@ package com.ssajudn.dotap.domain.usecase
 import com.ssajudn.dotap.domain.model.ActionResult
 import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.port.ActionPerformer
+import com.ssajudn.dotap.domain.port.PanelLauncher
 
 class ExecuteActionUseCase(
     private val actionPerformer: ActionPerformer,
     private val takeScreenshotUseCase: TakeScreenshotUseCase,
+    private val panelLauncher: PanelLauncher,
 ) {
     suspend operator fun invoke(action: ActionType): ActionResult = when (action) {
         ActionType.NONE -> ActionResult.Success
 
         ActionType.SCREENSHOT -> takeScreenshotUseCase()
 
-        // The panel ships in M4; until then the action must not pretend to succeed.
-        ActionType.OPEN_PANEL -> ActionResult.Unavailable("Panel is not available yet")
+        ActionType.OPEN_PANEL -> {
+            panelLauncher.open()
+            ActionResult.Success
+        }
 
         ActionType.HOME,
         ActionType.BACK,

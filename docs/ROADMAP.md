@@ -37,37 +37,37 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 
 ## M3 — Settings and persistence (FR-11, FR-43)
 
-- [ ] **M3.1** `DotSettings` model with validation (`Defaults`, `Limits`, `with...` clamping methods) and the `SettingsRepository` interface in `domain`; `DataStoreSettingsRepository` and `SettingsMapper` in `data` with the keys and defaults in `ARCHITECTURE.md`.
+- [x] **M3.1** `DotSettings` model with validation (`Defaults`, `Limits`, `with...` clamping methods) and the `SettingsRepository` interface in `domain`; `DataStoreSettingsRepository` and `SettingsMapper` in `data` with the keys and defaults in `ARCHITECTURE.md`.
   *Accept:* tests cover defaults, clamping, unknown stored values, and a round trip through a temp-file DataStore.
-- [ ] **M3.2** Service collects settings and applies them live (timeouts, assigned actions, haptics, dot position persisted across restarts).
+- [x] **M3.2** Service collects settings and applies them live (timeouts, assigned actions, haptics, dot position persisted across restarts).
   *Accept:* changing a setting changes behavior without restarting the service; dot position survives app and device restart.
-- [ ] **M3.3** MVVM settings and home screens: `SettingsViewModel`/`HomeViewModel` with `UiState`, `UiEvent`, and `UiEffect`; Route + stateless Screen with `@Preview`; Gestures (action dropdowns, timeouts), haptics and snap-to-edge toggles; dot visibility toggle. (Size and idle-opacity controls are added in M4.3.) Navigation Compose wiring.
+- [x] **M3.3** MVVM settings and home screens: `SettingsViewModel`/`HomeViewModel` with `UiState`, `UiEvent`, and `UiEffect`; Route + stateless Screen with `@Preview`; Gestures (action dropdowns, timeouts), haptics and snap-to-edge toggles; dot visibility toggle. (Size and idle-opacity controls are added in M4.3.) Navigation Compose wiring.
   *Accept:* ViewModel unit tests (fake repository, Turbine) pass; all controls have content descriptions; values are validated in the domain model; changes apply live.
 
 ## M4 — Quick-action panel (FR-30, FR-31, FR-33)
 
-- [ ] **M4.1** `OverlayLifecycleOwner` (lifecycle, saved-state, and ViewModelStore owner) and `PanelHost` showing a `ComposeView` panel as an accessibility overlay; implement the `PanelLauncher` port.
+- [x] **M4.1** `OverlayLifecycleOwner` (lifecycle, saved-state, and ViewModelStore owner) and `PanelHost` showing a `ComposeView` panel as an accessibility overlay; implement the `PanelLauncher` port.
   *Accept:* panel opens next to the dot, no crash on rapid open/close, no leaked views after close.
-- [ ] **M4.2** Panel UI with `PanelViewModel` (`PanelUiState`, `PanelUiEvent`, close effect): rounded 3×3 grid, centre Close cell, default six slots, tap-outside/Back dismiss. Add `OPEN_PANEL` action and make it the default single-tap action. Unit-test `PanelViewModel`.
+- [x] **M4.2** Panel UI with `PanelViewModel` (`PanelUiState`, `PanelUiEvent`, close effect): rounded 3×3 grid, centre Close cell, default six slots, tap-outside/Back dismiss. Add `OPEN_PANEL` action and make it the default single-tap action. Unit-test `PanelViewModel`.
   *Accept:* every slot runs its action and closes the panel; Screenshot from the panel hides panel and dot before capture.
-- [ ] **M4.3** Idle opacity and dot size: add the settings controls (Appearance screen) and apply them live (FR-3, FR-4).
+- [x] **M4.3** Idle opacity and dot size: add the settings controls (Appearance screen) and apply them live (FR-3, FR-4).
   *Accept:* dot fades after the idle delay and returns on touch; size slider resizes the dot immediately.
 
 ## M5 — Onboarding and compliance (FR-40, FR-41, FR-44, FR-47)
 
-- [ ] **M5.1** Onboarding flow with `OnboardingViewModel`: intro → prominent disclosure screen (text from `COMPLIANCE.md`, explicit Agree) → effect that opens Accessibility settings. Unit-test that the settings effect is emitted only after consent.
+- [x] **M5.1** Onboarding flow with `OnboardingViewModel`: intro → prominent disclosure screen (text from `COMPLIANCE.md`, explicit Agree) → effect that opens Accessibility settings. Unit-test that the settings effect is emitted only after consent.
   *Accept:* the disclosure is a separate screen, not buried in a privacy policy; the user cannot reach the system settings button without agreeing.
-- [ ] **M5.2** `ServiceStatusRepository` (`AccessibilityStatusRepository`) using the system enabled-services list, combined with the `ServiceConnectionTracker` hint in `ObserveServiceStatusUseCase`. Home screen shows the status with a button to open settings. Unit-test the use case for all three `ServiceStatus` values.
+- [x] **M5.2** `ServiceStatusRepository` (`AccessibilityStatusRepository`) using the system enabled-services list, combined with the `ServiceConnectionTracker` hint in `ObserveServiceStatusUseCase`. Home screen shows the status with a button to open settings. Unit-test the use case for all three `ServiceStatus` values.
   *Accept:* status is right after process death and after the user disables the service from system settings.
-- [ ] **M5.3** Android 13+ restricted-settings guidance for sideloaded installs.
+- [x] **M5.3** Android 13+ restricted-settings guidance for sideloaded installs.
   *Accept:* a help screen explains where to allow restricted settings; tested on an Android 13+ device with a sideloaded APK.
-- [ ] **M5.4** Prepare store materials: privacy policy page (no data collected), short and full description, screenshots, Data Safety answers, Permission Declaration draft, demo video script. See `COMPLIANCE.md`.
+- [x] **M5.4** Prepare store materials: privacy policy page (no data collected), short and full description, screenshots, Data Safety answers, Permission Declaration draft, demo video script. See `COMPLIANCE.md`.
   *Accept:* checklist in `COMPLIANCE.md` is complete.
 
 ## M6 — Polish and release (FR-45, FR-46, NFR-4 to NFR-8)
 
-- [ ] **M6.1** Quick Settings tile toggling dot visibility.
-- [ ] **M6.2** OEM battery guidance screen (Xiaomi, Oppo, Vivo, Samsung, Huawei) with a link to a vendor-specific help page.
-- [ ] **M6.3** TalkBack, dynamic color, large font/display sizes audit.
-- [ ] **M6.4** R8 keep rules check; release build size and memory audit (< 5 MB APK, < 30 MB runtime heap).
-- [ ] **M6.5** Pre-launch checklist: translation completeness, licensing, reproducible release build.
+- [x] **M6.1** Quick Settings tile toggling dot visibility.
+- [x] **M6.2** OEM battery guidance screen (Xiaomi, Oppo, Vivo, Samsung, Huawei) with a link to a vendor-specific help page.
+- [x] **M6.3** TalkBack, dynamic color, large font/display sizes audit.
+- [x] **M6.4** R8 keep rules check; release build size and memory audit (< 5 MB APK, < 30 MB runtime heap).
+- [x] **M6.5** Pre-launch checklist: translation completeness, licensing, reproducible release build.

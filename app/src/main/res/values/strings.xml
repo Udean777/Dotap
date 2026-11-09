@@ -10,6 +10,28 @@
     <string name="dot_content_description">Floating dot</string>
     <string name="settings_button">Settings</string>
 
+    <string name="settings_title">Settings</string>
+    <string name="back_button">Back</string>
+    <string name="settings_feedback_section">Feedback</string>
+    <string name="settings_behavior_section">Behavior</string>
+    <string name="haptics_label">Haptic feedback</string>
+    <string name="gestures_title">Gestures</string>
+    <string name="gestures_summary">Actions for each gesture and timing</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_summary">Dot visibility and edge snapping</string>
+    <string name="gesture_single_tap_label">Single tap</string>
+    <string name="gesture_double_tap_label">Double tap</string>
+    <string name="gesture_long_press_label">Long press</string>
+    <string name="double_tap_timeout_label">Double-tap timeout</string>
+    <string name="long_press_duration_label">Long-press duration</string>
+    <string name="timeout_value">%1$d ms</string>
+    <string name="dot_visibility_label">Show floating dot</string>
+    <string name="snap_to_edge_label">Snap to screen edge</string>
+    <string name="dot_size_label">Dot size</string>
+    <string name="dot_size_value">%1$d dp</string>
+    <string name="idle_opacity_label">Idle opacity</string>
+    <string name="idle_opacity_value">%1$d%%</string>
+
     <string name="action_screenshot">Screenshot</string>
     <string name="action_home">Home</string>
     <string name="action_back">Back</string>
@@ -22,4 +44,49 @@
     <string name="action_none">None</string>
 
     <string name="screenshot_unavailable">Screenshot unavailable on this device</string>
+
+    <string name="panel_close">Close</string>
+
+    <string name="onboarding_intro_title">Welcome to Dotap</string>
+    <string name="onboarding_intro_desc">A fast, private floating shortcut dot that places essential system actions and screenshot captures right under your thumb.</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_disclosure_title">Why Dotap Needs Accessibility Service</string>
+    <string name="onboarding_disclosure_purpose_title">Service Purpose</string>
+    <string name="onboarding_disclosure_purpose_desc">Dotap uses Android\'s AccessibilityService API solely to:\n• Display the floating shortcut dot above other applications.\n• Perform global actions you trigger, such as taking screenshots, going Home, Back, or opening Notifications.</string>
+    <string name="onboarding_disclosure_privacy_title">Privacy Guarantee</string>
+    <string name="onboarding_disclosure_privacy_desc">• Dotap NEVER reads, captures, or transmits your screen content, typed text, or personal information.\n• Dotap operates entirely offline with zero network permissions.</string>
+    <string name="onboarding_agree_button">Agree &amp; Continue</string>
+    <string name="onboarding_not_now_button">Not Now</string>
+
+    <string name="status_enabled_not_connected">Service enabled but not connected. Try toggling it off and on in Settings.</string>
+    <string name="restricted_settings_help_button">Can\'t enable service? (Android 13+)</string>
+    <string name="restricted_settings_title">Allow Restricted Settings</string>
+    <string name="restricted_settings_message">If the Accessibility switch is grayed out on Android 13 or later:\n\n1. Tap \"Open App Info\" below.\n2. Tap the three dots (⋮) in the top-right corner.\n3. Tap \"Allow restricted settings\" and verify your PIN or fingerprint.\n4. Return here and tap \"Enable in Accessibility Settings\".</string>
+    <string name="open_app_info_button">Open App Info</string>
+    <string name="close_dialog_button">Close</string>
+
+    <string name="tile_label">Floating Dot</string>
+    <string name="tile_state_active">Visible</string>
+    <string name="tile_state_inactive">Hidden</string>
+    <string name="tile_state_disabled">Service inactive</string>
+
+    <string name="settings_troubleshooting_section">Troubleshooting</string>
+    <string name="battery_guidance_title">Battery optimization</string>
+    <string name="battery_guidance_summary">Prevent system from stopping floating dot in background</string>
+    <string name="battery_guidance_intro">Some manufacturers aggressively close background overlay apps. Follow the steps below for your device to ensure Dotap stays active.</string>
+    <string name="battery_open_settings_button">Open Battery Settings</string>
+    <string name="battery_view_online_guide">Online Guide (dontkillmyapp.com)</string>
+    <string name="battery_detected_badge">Your device</string>
+    <string name="oem_brand_xiaomi">Xiaomi / Redmi / POCO</string>
+    <string name="oem_brand_samsung">Samsung</string>
+    <string name="oem_brand_oppo">OPPO / Realme / OnePlus</string>
+    <string name="oem_brand_vivo">Vivo / iQOO</string>
+    <string name="oem_brand_huawei">Huawei / Honor</string>
+    <string name="oem_brand_other">Google Pixel / Other</string>
+    <string name="battery_steps_xiaomi">1. Open Settings > Apps > Manage apps > Dotap.\n2. Turn ON \"Autostart\".\n3. Tap \"Battery saver\" and select \"No restrictions\".\n4. Lock Dotap in the Recents screen.</string>
+    <string name="battery_steps_samsung">1. Open Settings > Apps > Dotap > Battery.\n2. Select \"Unrestricted\".\n3. Open Settings > Battery and device care > Battery > Background usage limits > Never sleeping apps, then add Dotap.</string>
+    <string name="battery_steps_oppo">1. Open Settings > Battery > App Battery Management > Dotap.\n2. Enable \"Allow background activity\" and \"Allow auto-launch\".\n3. Lock Dotap in the Recents screen.</string>
+    <string name="battery_steps_vivo">1. Open Settings > Battery > Background power consumption management.\n2. Find Dotap and select \"High background power consumption\" or \"Don\'t restrict\".\n3. Enable Autostart in Permissions management.</string>
+    <string name="battery_steps_huawei">1. Open Settings > Battery > App launch.\n2. Turn OFF \"Manage automatically\" for Dotap.\n3. Turn ON \"Auto-launch\", \"Secondary launch\", and \"Run in background\".</string>
+    <string name="battery_steps_other">1. Open Settings > Apps > Dotap > App battery usage.\n2. Select \"Unrestricted\" or disable battery optimization.\n3. Ensure background usage is permitted.</string>
 </resources>

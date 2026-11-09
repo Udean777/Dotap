@@ -1,6 +1,7 @@
 package com.ssajudn.dotap.domain.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -14,9 +15,16 @@ class DotSettingsTest {
         assertEquals(Defaults.IDLE_OPACITY_PERCENT, settings.idleOpacityPercent)
         assertEquals(Defaults.DOUBLE_TAP_TIMEOUT_MS, settings.doubleTapTimeoutMs)
         assertEquals(Defaults.LONG_PRESS_DURATION_MS, settings.longPressDurationMs)
-        assertEquals(ActionType.HOME, settings.singleTapAction)
+        assertEquals(ActionType.OPEN_PANEL, settings.singleTapAction)
         assertEquals(ActionType.SCREENSHOT, settings.doubleTapAction)
         assertEquals(ActionType.NONE, settings.longPressAction)
+        assertFalse(settings.isOnboardingCompleted)
+    }
+
+    @Test
+    fun idleAlpha_convertsPercentToFraction() {
+        assertEquals(0.4f, DotSettings(idleOpacityPercent = 40).idleAlpha, 0.001f)
+        assertEquals(1f, DotSettings(idleOpacityPercent = Limits.MAX_IDLE_OPACITY_PERCENT).idleAlpha, 0.001f)
     }
 
     @Test

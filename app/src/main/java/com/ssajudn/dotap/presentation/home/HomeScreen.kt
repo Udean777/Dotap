@@ -6,13 +6,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,23 +29,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ServiceStatus
+import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
 @Composable
 fun HomeRoute(
     viewModel: HomeViewModel,
-    onNavigateToSettings: () -> Unit,
-    onOpenAccessibilitySettings: () -> Unit,
+    onEffect: (HomeUiEffect) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(viewModel) {
-        viewModel.uiEffect.collect { effect ->
-            when (effect) {
-                HomeUiEffect.NavigateToSettings -> onNavigateToSettings()
-                HomeUiEffect.OpenAccessibilitySettings -> onOpenAccessibilitySettings()
-            }
-        }
+        viewModel.uiEffect.collect(onEffect)
     }
 
     HomeScreen(
@@ -68,6 +68,13 @@ fun HomeScreen(
             innerPadding = innerPadding,
         )
     }
+
+    if (state.showRestrictedSettingsDialog) {
+        RestrictedSettingsDialog(
+            onDismiss = { onEvent(HomeUiEvent.DismissRestrictedSettingsDialog) },
+            onOpenAppInfo = { onEvent(HomeUiEvent.OpenAppInfoClicked) },
+        )
+    }
 }
 
 @Composable
@@ -80,15 +87,23 @@ private fun HomeBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         StatusCard(
             serviceStatus = state.serviceStatus,
             onEnableClicked = { onEvent(HomeUiEvent.OpenAccessibilitySettingsClicked) },
+            onRestrictedHelpClicked = { onEvent(HomeUiEvent.RestrictedSettingsHelpClicked) },
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        LabeledSwitchRow(
+            label = stringResource(R.string.dot_visibility_label),
+            checked = state.isDotEnabled,
+            onCheckedChange = { onEvent(HomeUiEvent.DotVisibilityToggled(it)) },
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { onEvent(HomeUiEvent.OpenSettingsClicked) },
@@ -103,35 +118,71 @@ private fun HomeBody(
 private fun StatusCard(
     serviceStatus: ServiceStatus,
     onEnableClicked: () -> Unit,
+    onRestrictedHelpClicked: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            val statusTextRes = if (serviceStatus == ServiceStatus.ENABLED_CONNECTED) {
-                R.string.status_enabled
-            } else {
-                R.string.status_disabled
+            val statusTextRes = when (serviceStatus) {
+                ServiceStatus.ENABLED_CONNECTED -> R.string.status_enabled
+                ServiceStatus.ENABLED_NOT_CONNECTED -> R.string.status_enabled_not_connected
+                ServiceStatus.DISABLED -> R.string.status_disabled
             }
-
             Text(
                 text = stringResource(statusTextRes),
                 style = MaterialTheme.typography.titleMedium,
             )
-
             if (serviceStatus != ServiceStatus.ENABLED_CONNECTED) {
-                Button(
-                    onClick = onEnableClicked,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(R.string.enable_service_button))
-                }
+                StatusActionButtons(
+                    onEnableClicked = onEnableClicked,
+                    onRestrictedHelpClicked = onRestrictedHelpClicked,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun StatusActionButtons(
+    onEnableClicked: () -> Unit,
+    onRestrictedHelpClicked: () -> Unit,
+) {
+    Button(
+        onClick = onEnableClicked,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(text = stringResource(R.string.enable_service_button))
+    }
+    TextButton(
+        onClick = onRestrictedHelpClicked,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(text = stringResource(R.string.restricted_settings_help_button))
+    }
+}
+
+@Composable
+private fun RestrictedSettingsDialog(
+    onDismiss: () -> Unit,
+    onOpenAppInfo: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.restricted_settings_title)) },
+        text = { Text(text = stringResource(R.string.restricted_settings_message)) },
+        confirmButton = {
+            Button(onClick = onOpenAppInfo) {
+                Text(text = stringResource(R.string.open_app_info_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.close_dialog_button))
+            }
+        },
+    )
 }
 
 @Preview(showBackground = true)

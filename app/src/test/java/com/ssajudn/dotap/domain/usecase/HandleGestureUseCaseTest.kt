@@ -9,6 +9,7 @@ import com.ssajudn.dotap.domain.port.ActionPerformer
 import com.ssajudn.dotap.domain.port.HapticFeedback
 import com.ssajudn.dotap.domain.port.OverlayVisibility
 import com.ssajudn.dotap.domain.repository.SettingsRepository
+import com.ssajudn.dotap.testutil.FakePanelLauncher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -51,7 +52,7 @@ class HandleGestureUseCaseTest {
             hideDelayMs = 0L,
             restoreDelayMs = 0L,
         )
-        executeActionUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase)
+        executeActionUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase, FakePanelLauncher())
         useCase = HandleGestureUseCase(settingsRepository, hapticFeedback, executeActionUseCase)
     }
 

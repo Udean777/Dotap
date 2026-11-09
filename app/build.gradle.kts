@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,24 +7,56 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+// Release credentials come from local keystore.properties or environment variables (CI).
+val keystoreProps = Properties()
+rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use {
+    keystoreProps.load(it)
+}
+val releaseStorePath = keystoreProps["storeFile"]?.toString() ?: System.getenv("KEYSTORE_FILE")
+val releaseStoreFile =
+    releaseStorePath?.let { path ->
+        file(path).takeIf { it.exists() } ?: rootProject.file(path.removePrefix("/"))
+    }
+val releaseStorePassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProps["storePassword"] as String?
+val releaseKeyAlias = System.getenv("KEY_ALIAS") ?: keystoreProps["keyAlias"] as String?
+val releaseKeyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProps["keyPassword"] as String?
+val releaseVersionCodeInput = System.getenv("VERSION_CODE")
+val releaseVersionNameInput = System.getenv("VERSION_NAME")
+
 android {
     namespace = "com.ssajudn.dotap"
     compileSdk {
         version = release(37)
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseStoreFile != null && releaseStoreFile.exists()) {
+                storeFile = releaseStoreFile
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                enableV1Signing = true
+                enableV2Signing = true
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "com.ssajudn.dotap"
         minSdk = 28
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = releaseVersionCodeInput?.toIntOrNull() ?: 1
+        versionName = releaseVersionNameInput ?: "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
+            if (releaseStoreFile != null && releaseStoreFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")

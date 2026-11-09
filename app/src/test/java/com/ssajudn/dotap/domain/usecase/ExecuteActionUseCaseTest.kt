@@ -5,6 +5,7 @@ import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.model.MessageType
 import com.ssajudn.dotap.domain.port.ActionPerformer
 import com.ssajudn.dotap.domain.port.OverlayVisibility
+import com.ssajudn.dotap.testutil.FakePanelLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -15,6 +16,7 @@ class ExecuteActionUseCaseTest {
 
     private lateinit var actionPerformer: FakeActionPerformer
     private lateinit var overlayVisibility: FakeOverlayVisibility
+    private lateinit var panelLauncher: FakePanelLauncher
     private lateinit var takeScreenshotUseCase: TakeScreenshotUseCase
     private lateinit var useCase: ExecuteActionUseCase
 
@@ -22,6 +24,7 @@ class ExecuteActionUseCaseTest {
     fun setUp() {
         actionPerformer = FakeActionPerformer()
         overlayVisibility = FakeOverlayVisibility()
+        panelLauncher = FakePanelLauncher()
         takeScreenshotUseCase = TakeScreenshotUseCase(
             overlayVisibility = overlayVisibility,
             actionPerformer = actionPerformer,
@@ -31,6 +34,7 @@ class ExecuteActionUseCaseTest {
         useCase = ExecuteActionUseCase(
             actionPerformer = actionPerformer,
             takeScreenshotUseCase = takeScreenshotUseCase,
+            panelLauncher = panelLauncher,
         )
     }
 
@@ -49,9 +53,10 @@ class ExecuteActionUseCaseTest {
     }
 
     @Test
-    fun `open panel action is unavailable until the panel ships`() = runTest {
+    fun `open panel action opens the panel without a global action`() = runTest {
         val result = useCase(ActionType.OPEN_PANEL)
-        assertTrue(result is ActionResult.Unavailable)
+        assertTrue(result is ActionResult.Success)
+        assertEquals(1, panelLauncher.openCount)
         assertEquals(emptyList<ActionType>(), actionPerformer.performedActions)
     }
 

@@ -15,7 +15,11 @@ data class DotSettings(
     val isSnapToEdgeEnabled: Boolean = Defaults.SNAP_TO_EDGE,
     val isRightSide: Boolean = Defaults.DOT_SIDE_RIGHT,
     val yRatio: Float = Defaults.DOT_Y_RATIO,
+    val isOnboardingCompleted: Boolean = Defaults.ONBOARDING_COMPLETED,
 ) {
+    /** Idle opacity as a 0..1 alpha; 100% is the upper limit and means no fading. */
+    val idleAlpha: Float get() = idleOpacityPercent.toFloat() / Limits.MAX_IDLE_OPACITY_PERCENT
+
     fun withDotSize(sizeDp: Int): DotSettings = copy(
         dotSizeDp = sizeDp.coerceIn(
             Limits.MIN_DOT_SIZE_DP,

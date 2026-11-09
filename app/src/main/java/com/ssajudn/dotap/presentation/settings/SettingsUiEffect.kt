@@ -5,5 +5,7 @@ sealed interface SettingsUiEffect {
 
     data object NavigateToAppearance : SettingsUiEffect
 
+    data object NavigateToBatteryGuidance : SettingsUiEffect
+
     data object NavigateBack : SettingsUiEffect
 }

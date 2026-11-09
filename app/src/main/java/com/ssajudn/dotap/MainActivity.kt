@@ -35,6 +35,12 @@ class MainActivity : ComponentActivity() {
                 )
                 startActivity(intent)
             },
+            onOpenBatterySettings = {
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            },
+            onOpenWebUrl = { url ->
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            },
         )
         setContent {
             MainAppContent(container, systemActions)

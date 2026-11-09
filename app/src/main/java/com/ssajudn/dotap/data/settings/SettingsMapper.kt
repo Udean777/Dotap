@@ -66,7 +66,10 @@ internal class SettingsMapper {
 
     private fun <T> Preferences.value(key: Preferences.Key<T>, fallback: T): T = this[key] ?: fallback
 
-    private fun Preferences.longValue(key: Preferences.Key<Int>, fallback: Long): Long = value(key, fallback.toInt()).toLong()
+    private fun Preferences.longValue(
+        key: Preferences.Key<Int>,
+        fallback: Long,
+    ): Long = value(key, fallback.toInt()).toLong()
 
     private fun String?.toActionType(fallback: ActionType): ActionType {
         val stored = this

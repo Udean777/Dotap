@@ -13,6 +13,7 @@ import com.ssajudn.dotap.domain.repository.SettingsRepository
 import com.ssajudn.dotap.domain.status.ServiceConnectionTracker
 import com.ssajudn.dotap.domain.usecase.ObserveServiceStatusUseCase
 import com.ssajudn.dotap.presentation.appearance.AppearanceViewModel
+import com.ssajudn.dotap.presentation.battery.BatteryGuidanceViewModel
 import com.ssajudn.dotap.presentation.gestures.GesturesViewModel
 import com.ssajudn.dotap.presentation.home.HomeViewModel
 import com.ssajudn.dotap.presentation.navigation.ScreenViewModelFactories
@@ -104,11 +105,22 @@ class AppContainer(
             }
         }
 
+    private val batteryGuidanceViewModelFactory: ViewModelProvider.Factory =
+        viewModelFactory {
+            initializer {
+                BatteryGuidanceViewModel(
+                    dispatcherProvider = dispatcherProvider,
+                    deviceManufacturer = android.os.Build.MANUFACTURER,
+                )
+            }
+        }
+
     val screenViewModelFactories: ScreenViewModelFactories = ScreenViewModelFactories(
         onboarding = onboardingViewModelFactory,
         home = homeViewModelFactory,
         settings = settingsViewModelFactory,
         gestures = gesturesViewModelFactory,
         appearance = appearanceViewModelFactory,
+        batteryGuidance = batteryGuidanceViewModelFactory,
     )
 }

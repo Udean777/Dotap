@@ -15,8 +15,13 @@ import com.ssajudn.dotap.R
 class DotView(
     context: Context,
     private val onTouchListener: (View, MotionEvent) -> Boolean = { _, _ -> false },
-    private val onClickAction: () -> Unit = {},
+    private val actions: ClickActions = ClickActions(),
 ) : View(context) {
+
+    data class ClickActions(
+        val onClick: () -> Unit = {},
+        val onLongClick: () -> Unit = {},
+    )
 
     private val outerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -39,7 +44,8 @@ class DotView(
     init {
         contentDescription = context.getString(R.string.dot_content_description)
         isClickable = true
-        isFocusable = false
+        isLongClickable = true
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
     fun render(state: DotUiState) {
@@ -97,7 +103,13 @@ class DotView(
     // TalkBack activation must trigger the single-tap action, which raw touch handling alone never reaches.
     override fun performClick(): Boolean {
         super.performClick()
-        onClickAction()
+        actions.onClick()
+        return true
+    }
+
+    override fun performLongClick(): Boolean {
+        super.performLongClick()
+        actions.onLongClick()
         return true
     }
 

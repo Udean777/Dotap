@@ -66,8 +66,8 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 
 ## M6 — Polish and release (FR-45, FR-46, NFR-4 to NFR-8)
 
-- [ ] **M6.1** Quick Settings tile toggling dot visibility.
-- [ ] **M6.2** OEM battery guidance screen (Xiaomi, Oppo, Vivo, Samsung, Huawei) with a link to a vendor-specific help page.
-- [ ] **M6.3** TalkBack, dynamic color, large font/display sizes audit.
-- [ ] **M6.4** R8 keep rules check; release build size and memory audit (< 5 MB APK, < 30 MB runtime heap).
-- [ ] **M6.5** Pre-launch checklist: translation completeness, licensing, reproducible release build.
+- [x] **M6.1** Quick Settings tile toggling dot visibility.
+- [x] **M6.2** OEM battery guidance screen (Xiaomi, Oppo, Vivo, Samsung, Huawei) with a link to a vendor-specific help page.
+- [x] **M6.3** TalkBack, dynamic color, large font/display sizes audit.
+- [x] **M6.4** R8 keep rules check; release build size and memory audit (< 5 MB APK, < 30 MB runtime heap).
+- [x] **M6.5** Pre-launch checklist: translation completeness, licensing, reproducible release build.

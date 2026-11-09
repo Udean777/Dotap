@@ -24,6 +24,7 @@ class OverlayController(
     private var snapAnimator: ValueAnimator? = null
     var gestureEngine: GestureEngine? = null
     var accessibilityClick: (() -> Unit)? = null
+    var accessibilityLongClick: (() -> Unit)? = null
 
     /** Called when the dot settles after a drag so the service can persist the position. */
     var onPositionSettled: ((isRightSide: Boolean, yRatio: Float) -> Unit)? = null
@@ -45,7 +46,10 @@ class OverlayController(
         val view = createDotView(
             context = context,
             onTouch = { _, event -> handleTouchEvent(event, presenter, gestureEngine) },
-            onClick = { accessibilityClick?.invoke() },
+            actions = DotView.ClickActions(
+                onClick = { accessibilityClick?.invoke() },
+                onLongClick = { accessibilityLongClick?.invoke() },
+            ),
         )
         view.render(state)
         if (attachOverlayView(windowManager, view, params)) {

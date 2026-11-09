@@ -7,5 +7,7 @@ sealed interface SettingsUiEvent {
 
     data object OpenAppearanceClicked : SettingsUiEvent
 
+    data object OpenBatteryGuidanceClicked : SettingsUiEvent
+
     data object BackClicked : SettingsUiEvent
 }

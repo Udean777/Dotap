@@ -10,6 +10,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ssajudn.dotap.presentation.appearance.AppearanceRoute
 import com.ssajudn.dotap.presentation.appearance.AppearanceViewModel
+import com.ssajudn.dotap.presentation.battery.BatteryGuidanceRoute
+import com.ssajudn.dotap.presentation.battery.BatteryGuidanceUiEffect
+import com.ssajudn.dotap.presentation.battery.BatteryGuidanceViewModel
 import com.ssajudn.dotap.presentation.gestures.GesturesRoute
 import com.ssajudn.dotap.presentation.gestures.GesturesViewModel
 import com.ssajudn.dotap.presentation.home.HomeRoute
@@ -34,6 +37,7 @@ fun DotapNavHost(
         settingsDestination(navController, factories.settings)
         gesturesDestination(navController, factories.gestures)
         appearanceDestination(navController, factories.appearance)
+        batteryGuidanceDestination(navController, factories.batteryGuidance, systemActions)
     }
 }
 
@@ -84,7 +88,13 @@ private fun NavGraphBuilder.settingsDestination(
             onEffect = { effect ->
                 when (effect) {
                     SettingsUiEffect.NavigateToGestures -> navController.navigate(Destinations.GESTURES)
+
                     SettingsUiEffect.NavigateToAppearance -> navController.navigate(Destinations.APPEARANCE)
+
+                    SettingsUiEffect.NavigateToBatteryGuidance -> navController.navigate(
+                        Destinations.BATTERY_GUIDANCE,
+                    )
+
                     SettingsUiEffect.NavigateBack -> navController.popBackStack()
                 }
             },
@@ -112,6 +122,25 @@ private fun NavGraphBuilder.appearanceDestination(
         AppearanceRoute(
             viewModel = viewModel<AppearanceViewModel>(factory = factory),
             onBack = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.batteryGuidanceDestination(
+    navController: NavHostController,
+    factory: ViewModelProvider.Factory,
+    systemActions: SystemActions,
+) {
+    composable(Destinations.BATTERY_GUIDANCE) {
+        BatteryGuidanceRoute(
+            viewModel = viewModel<BatteryGuidanceViewModel>(factory = factory),
+            onEffect = { effect ->
+                when (effect) {
+                    BatteryGuidanceUiEffect.NavigateBack -> navController.popBackStack()
+                    BatteryGuidanceUiEffect.OpenBatterySettings -> systemActions.onOpenBatterySettings()
+                    is BatteryGuidanceUiEffect.OpenWebHelp -> systemActions.onOpenWebUrl(effect.url)
+                }
+            },
         )
     }
 }

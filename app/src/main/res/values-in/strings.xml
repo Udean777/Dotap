@@ -64,4 +64,29 @@
     <string name="restricted_settings_message">Jika tombol Aksesibilitas tidak dapat ditekan (abu-abu) di Android 13 ke atas:\n\n1. Ketuk \"Buka Info Aplikasi\" di bawah.\n2. Ketuk ikon titik tiga (⋮) di pojok kanan atas.\n3. Ketuk \"Izinkan setelan terbatas\" lalu verifikasi PIN atau sidik jari.\n4. Kembali ke sini dan ketuk \"Aktifkan di Pengaturan Aksesibilitas\".</string>
     <string name="open_app_info_button">Buka Info Aplikasi</string>
     <string name="close_dialog_button">Tutup</string>
+
+    <string name="tile_label">Dot Melayang</string>
+    <string name="tile_state_active">Tampil</string>
+    <string name="tile_state_inactive">Tersembunyi</string>
+    <string name="tile_state_disabled">Layanan mati</string>
+
+    <string name="settings_troubleshooting_section">Pemecahan Masalah</string>
+    <string name="battery_guidance_title">Pengoptimalan baterai</string>
+    <string name="battery_guidance_summary">Cegah sistem mematikan dot melayang di latar belakang</string>
+    <string name="battery_guidance_intro">Beberapa produsen perangkat menutup aplikasi overlay di latar belakang untuk hemat daya. Ikuti langkah untuk perangkat Anda agar Dotap tetap aktif.</string>
+    <string name="battery_open_settings_button">Buka Pengaturan Baterai</string>
+    <string name="battery_view_online_guide">Panduan Online (dontkillmyapp.com)</string>
+    <string name="battery_detected_badge">Perangkat Anda</string>
+    <string name="oem_brand_xiaomi">Xiaomi / Redmi / POCO</string>
+    <string name="oem_brand_samsung">Samsung</string>
+    <string name="oem_brand_oppo">OPPO / Realme / OnePlus</string>
+    <string name="oem_brand_vivo">Vivo / iQOO</string>
+    <string name="oem_brand_huawei">Huawei / Honor</string>
+    <string name="oem_brand_other">Google Pixel / Lainnya</string>
+    <string name="battery_steps_xiaomi">1. Buka Pengaturan > Aplikasi > Kelola aplikasi > Dotap.\n2. Aktifkan \"Mulai otomatis\" (Autostart).\n3. Ketuk \"Penghemat baterai\" dan pilih \"Tidak ada pembatasan\".\n4. Kunci Dotap di layar Aplikasi Terakhir.</string>
+    <string name="battery_steps_samsung">1. Buka Pengaturan > Aplikasi > Dotap > Baterai.\n2. Pilih \"Tidak dibatasi\" (Unrestricted).\n3. Buka Pengaturan > Perawatan perangkat > Baterai > Batas penggunaan latar belakang > Aplikasi yang tidak pernah tidur, lalu tambahkan Dotap.</string>
+    <string name="battery_steps_oppo">1. Buka Pengaturan > Baterai > Manajemen Baterai Aplikasi > Dotap.\n2. Aktifkan \"Izinkan aktivitas latar belakang\" dan \"Izinkan mulai otomatis\".\n3. Kunci Dotap di layar Aplikasi Terakhir.</string>
+    <string name="battery_steps_vivo">1. Buka Pengaturan > Baterai > Manajemen konsumsi daya latar belakang tinggi.\n2. Cari Dotap lalu pilih \"Konsumsi daya latar belakang tinggi\" / \"Jangan batasi\".\n3. Aktifkan Mulai Otomatis di Pengelola Izin.</string>
+    <string name="battery_steps_huawei">1. Buka Pengaturan > Baterai > Peluncuran aplikasi.\n2. Matikan \"Kelola secara otomatis\" untuk Dotap.\n3. Aktifkan \"Mulai otomatis\", \"Mulai sekunder\", dan \"Jalankan di latar belakang\".</string>
+    <string name="battery_steps_other">1. Buka Pengaturan > Aplikasi > Dotap > Penggunaan baterai aplikasi.\n2. Pilih \"Tidak dibatasi\" atau nonaktifkan pengoptimalan baterai.\n3. Pastikan aktivitas latar belakang diizinkan.</string>
 </resources>

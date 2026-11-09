@@ -20,6 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,29 +56,40 @@ fun PanelScreen(
     state: PanelUiState,
     onEvent: (PanelUiEvent) -> Unit,
 ) {
+    val panelTitle = stringResource(R.string.action_open_panel)
     DotapTheme {
         Surface(
-            modifier = Modifier.size(PanelDimensions.SIDE_DP.dp),
+            modifier = Modifier
+                .size(PanelDimensions.SIDE_DP.dp)
+                .semantics { paneTitle = panelTitle },
             shape = RoundedCornerShape(PanelDimensions.CORNER_RADIUS_DP.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             tonalElevation = 6.dp,
             shadowElevation = 8.dp,
         ) {
-            val grid = resolveGridSlots(state.slots)
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(PanelDimensions.CONTENT_PADDING_DP.dp),
-                verticalArrangement = Arrangement.spacedBy(PanelDimensions.CELL_SPACING_DP.dp),
-            ) {
-                for (rowIndex in 0 until PanelDimensions.GRID_COLUMNS) {
-                    PanelRow(
-                        rowIndex = rowIndex,
-                        rowSlots = grid[rowIndex],
-                        onEvent = onEvent,
-                    )
-                }
-            }
+            PanelGrid(slots = state.slots, onEvent = onEvent)
+        }
+    }
+}
+
+@Composable
+private fun PanelGrid(
+    slots: List<ActionType>,
+    onEvent: (PanelUiEvent) -> Unit,
+) {
+    val grid = resolveGridSlots(slots)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(PanelDimensions.CONTENT_PADDING_DP.dp),
+        verticalArrangement = Arrangement.spacedBy(PanelDimensions.CELL_SPACING_DP.dp),
+    ) {
+        for (rowIndex in 0 until PanelDimensions.GRID_COLUMNS) {
+            PanelRow(
+                rowIndex = rowIndex,
+                rowSlots = grid[rowIndex],
+                onEvent = onEvent,
+            )
         }
     }
 }
@@ -118,7 +133,9 @@ private fun PanelActionCell(
         onClick = onClick,
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-        modifier = Modifier.size(PanelDimensions.CELL_SIZE_DP.dp),
+        modifier = Modifier
+            .size(PanelDimensions.CELL_SIZE_DP.dp)
+            .semantics { role = Role.Button },
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -143,7 +160,9 @@ private fun PanelCloseCell(
         onClick = onClick,
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primaryContainer,
-        modifier = Modifier.size(PanelDimensions.CELL_SIZE_DP.dp),
+        modifier = Modifier
+            .size(PanelDimensions.CELL_SIZE_DP.dp)
+            .semantics { role = Role.Button },
     ) {
         Box(
             contentAlignment = Alignment.Center,

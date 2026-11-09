@@ -39,6 +39,10 @@ class SettingsViewModel(
 
                 SettingsUiEvent.OpenAppearanceClicked -> _uiEffect.send(SettingsUiEffect.NavigateToAppearance)
 
+                SettingsUiEvent.OpenBatteryGuidanceClicked -> _uiEffect.send(
+                    SettingsUiEffect.NavigateToBatteryGuidance,
+                )
+
                 SettingsUiEvent.BackClicked -> _uiEffect.send(SettingsUiEffect.NavigateBack)
             }
         }

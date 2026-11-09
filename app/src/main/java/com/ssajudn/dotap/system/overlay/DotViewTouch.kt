@@ -8,11 +8,11 @@ import com.ssajudn.dotap.domain.gesture.GestureEngine
 internal fun createDotView(
     context: Context,
     onTouch: (View, MotionEvent) -> Boolean,
-    onClick: () -> Unit,
+    actions: DotView.ClickActions,
 ): DotView = DotView(
     context = context,
     onTouchListener = onTouch,
-    onClickAction = onClick,
+    actions = actions,
 )
 
 internal fun handleTouchEvent(

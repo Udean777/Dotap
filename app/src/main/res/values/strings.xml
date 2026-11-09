@@ -64,4 +64,29 @@
     <string name="restricted_settings_message">If the Accessibility switch is grayed out on Android 13 or later:\n\n1. Tap \"Open App Info\" below.\n2. Tap the three dots (⋮) in the top-right corner.\n3. Tap \"Allow restricted settings\" and verify your PIN or fingerprint.\n4. Return here and tap \"Enable in Accessibility Settings\".</string>
     <string name="open_app_info_button">Open App Info</string>
     <string name="close_dialog_button">Close</string>
+
+    <string name="tile_label">Floating Dot</string>
+    <string name="tile_state_active">Visible</string>
+    <string name="tile_state_inactive">Hidden</string>
+    <string name="tile_state_disabled">Service inactive</string>
+
+    <string name="settings_troubleshooting_section">Troubleshooting</string>
+    <string name="battery_guidance_title">Battery optimization</string>
+    <string name="battery_guidance_summary">Prevent system from stopping floating dot in background</string>
+    <string name="battery_guidance_intro">Some manufacturers aggressively close background overlay apps. Follow the steps below for your device to ensure Dotap stays active.</string>
+    <string name="battery_open_settings_button">Open Battery Settings</string>
+    <string name="battery_view_online_guide">Online Guide (dontkillmyapp.com)</string>
+    <string name="battery_detected_badge">Your device</string>
+    <string name="oem_brand_xiaomi">Xiaomi / Redmi / POCO</string>
+    <string name="oem_brand_samsung">Samsung</string>
+    <string name="oem_brand_oppo">OPPO / Realme / OnePlus</string>
+    <string name="oem_brand_vivo">Vivo / iQOO</string>
+    <string name="oem_brand_huawei">Huawei / Honor</string>
+    <string name="oem_brand_other">Google Pixel / Other</string>
+    <string name="battery_steps_xiaomi">1. Open Settings > Apps > Manage apps > Dotap.\n2. Turn ON \"Autostart\".\n3. Tap \"Battery saver\" and select \"No restrictions\".\n4. Lock Dotap in the Recents screen.</string>
+    <string name="battery_steps_samsung">1. Open Settings > Apps > Dotap > Battery.\n2. Select \"Unrestricted\".\n3. Open Settings > Battery and device care > Battery > Background usage limits > Never sleeping apps, then add Dotap.</string>
+    <string name="battery_steps_oppo">1. Open Settings > Battery > App Battery Management > Dotap.\n2. Enable \"Allow background activity\" and \"Allow auto-launch\".\n3. Lock Dotap in the Recents screen.</string>
+    <string name="battery_steps_vivo">1. Open Settings > Battery > Background power consumption management.\n2. Find Dotap and select \"High background power consumption\" or \"Don\'t restrict\".\n3. Enable Autostart in Permissions management.</string>
+    <string name="battery_steps_huawei">1. Open Settings > Battery > App launch.\n2. Turn OFF \"Manage automatically\" for Dotap.\n3. Turn ON \"Auto-launch\", \"Secondary launch\", and \"Run in background\".</string>
+    <string name="battery_steps_other">1. Open Settings > Apps > Dotap > App battery usage.\n2. Select \"Unrestricted\" or disable battery optimization.\n3. Ensure background usage is permitted.</string>
 </resources>

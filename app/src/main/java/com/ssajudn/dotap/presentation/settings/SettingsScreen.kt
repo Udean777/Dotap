@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -73,28 +75,67 @@ private fun SettingsBody(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
+            .padding(innerPadding)
+            .verticalScroll(rememberScrollState()),
     ) {
-        SectionHeader(text = stringResource(R.string.settings_feedback_section))
-        LabeledSwitchRow(
-            label = stringResource(R.string.haptics_label),
-            checked = state.settings.isHapticsEnabled,
-            onCheckedChange = { onEvent(SettingsUiEvent.HapticsToggled(it)) },
-            modifier = Modifier.padding(horizontal = 16.dp),
+        FeedbackSection(
+            isHapticsEnabled = state.settings.isHapticsEnabled,
+            onHapticsToggled = { onEvent(SettingsUiEvent.HapticsToggled(it)) },
         )
         HorizontalDivider()
-        SectionHeader(text = stringResource(R.string.settings_behavior_section))
-        NavigationRow(
-            title = stringResource(R.string.gestures_title),
-            summary = stringResource(R.string.gestures_summary),
-            onClick = { onEvent(SettingsUiEvent.OpenGesturesClicked) },
+        BehaviorSection(
+            onGesturesClicked = { onEvent(SettingsUiEvent.OpenGesturesClicked) },
+            onAppearanceClicked = { onEvent(SettingsUiEvent.OpenAppearanceClicked) },
         )
-        NavigationRow(
-            title = stringResource(R.string.appearance_title),
-            summary = stringResource(R.string.appearance_summary),
-            onClick = { onEvent(SettingsUiEvent.OpenAppearanceClicked) },
+        HorizontalDivider()
+        TroubleshootingSection(
+            onBatteryGuidanceClicked = { onEvent(SettingsUiEvent.OpenBatteryGuidanceClicked) },
         )
     }
+}
+
+@Composable
+private fun FeedbackSection(
+    isHapticsEnabled: Boolean,
+    onHapticsToggled: (Boolean) -> Unit,
+) {
+    SectionHeader(text = stringResource(R.string.settings_feedback_section))
+    LabeledSwitchRow(
+        label = stringResource(R.string.haptics_label),
+        checked = isHapticsEnabled,
+        onCheckedChange = onHapticsToggled,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
+}
+
+@Composable
+private fun BehaviorSection(
+    onGesturesClicked: () -> Unit,
+    onAppearanceClicked: () -> Unit,
+) {
+    SectionHeader(text = stringResource(R.string.settings_behavior_section))
+    NavigationRow(
+        title = stringResource(R.string.gestures_title),
+        summary = stringResource(R.string.gestures_summary),
+        onClick = onGesturesClicked,
+    )
+    NavigationRow(
+        title = stringResource(R.string.appearance_title),
+        summary = stringResource(R.string.appearance_summary),
+        onClick = onAppearanceClicked,
+    )
+}
+
+@Composable
+private fun TroubleshootingSection(
+    onBatteryGuidanceClicked: () -> Unit,
+) {
+    SectionHeader(text = stringResource(R.string.settings_troubleshooting_section))
+    NavigationRow(
+        title = stringResource(R.string.battery_guidance_title),
+        summary = stringResource(R.string.battery_guidance_summary),
+        onClick = onBatteryGuidanceClicked,
+    )
 }
 
 @Composable

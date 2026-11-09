@@ -50,6 +50,15 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `open battery guidance emits navigation effect`() = runTest {
+        viewModel.uiEffect.test {
+            viewModel.onEvent(SettingsUiEvent.OpenBatteryGuidanceClicked)
+            assertEquals(SettingsUiEffect.NavigateToBatteryGuidance, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `back emits back effect`() = runTest {
         viewModel.uiEffect.test {
             viewModel.onEvent(SettingsUiEvent.BackClicked)

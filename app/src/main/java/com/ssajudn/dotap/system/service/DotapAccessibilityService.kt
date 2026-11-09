@@ -56,6 +56,7 @@ class DotapAccessibilityService : AccessibilityService() {
         val gestureEngine = buildGestureEngine(dotPresenter, controller, touchSlopPx)
         controller.gestureEngine = gestureEngine
         controller.accessibilityClick = { dotPresenter.onGesture(GestureType.SINGLE_TAP) }
+        controller.accessibilityLongClick = { dotPresenter.onGesture(GestureType.LONG_PRESS) }
         controller.show()
 
         dotPresenter.uiState.onEach { controller.update(it) }.launchIn(scope)

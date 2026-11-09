@@ -17,15 +17,12 @@ internal class SettingsMapper {
             isDotEnabled = preferences.value(SettingsKeys.DOT_ENABLED, defaults.isDotEnabled),
             dotSizeDp = preferences.value(SettingsKeys.DOT_SIZE_DP, defaults.dotSizeDp),
             idleOpacityPercent = preferences.value(SettingsKeys.IDLE_OPACITY_PCT, defaults.idleOpacityPercent),
-            idleDelayMs = preferences.value(SettingsKeys.IDLE_DELAY_MS, defaults.idleDelayMs.toInt()).toLong(),
-            doubleTapTimeoutMs = preferences.value(
+            idleDelayMs = preferences.longValue(SettingsKeys.IDLE_DELAY_MS, defaults.idleDelayMs),
+            doubleTapTimeoutMs = preferences.longValue(
                 SettingsKeys.DOUBLE_TAP_TIMEOUT_MS,
-                defaults.doubleTapTimeoutMs.toInt(),
-            ).toLong(),
-            longPressDurationMs = preferences.value(
-                SettingsKeys.LONG_PRESS_MS,
-                defaults.longPressDurationMs.toInt(),
-            ).toLong(),
+                defaults.doubleTapTimeoutMs,
+            ),
+            longPressDurationMs = preferences.longValue(SettingsKeys.LONG_PRESS_MS, defaults.longPressDurationMs),
             singleTapAction = preferences[SettingsKeys.ACTION_SINGLE].toActionType(defaults.singleTapAction),
             doubleTapAction = preferences[SettingsKeys.ACTION_DOUBLE].toActionType(defaults.doubleTapAction),
             longPressAction = preferences[SettingsKeys.ACTION_LONG].toActionType(defaults.longPressAction),
@@ -34,6 +31,10 @@ internal class SettingsMapper {
             isSnapToEdgeEnabled = preferences.value(SettingsKeys.SNAP_TO_EDGE, defaults.isSnapToEdgeEnabled),
             isRightSide = preferences.value(SettingsKeys.DOT_SIDE, SIDE_RIGHT) != SIDE_LEFT,
             yRatio = preferences.value(SettingsKeys.DOT_Y_RATIO, defaults.yRatio),
+            isOnboardingCompleted = preferences.value(
+                SettingsKeys.ONBOARDING_COMPLETED,
+                defaults.isOnboardingCompleted,
+            ),
         )
         return stored.withClampedValues()
     }
@@ -60,9 +61,12 @@ internal class SettingsMapper {
         preferences[SettingsKeys.SNAP_TO_EDGE] = settings.isSnapToEdgeEnabled
         preferences[SettingsKeys.DOT_SIDE] = if (settings.isRightSide) SIDE_RIGHT else SIDE_LEFT
         preferences[SettingsKeys.DOT_Y_RATIO] = settings.yRatio
+        preferences[SettingsKeys.ONBOARDING_COMPLETED] = settings.isOnboardingCompleted
     }
 
     private fun <T> Preferences.value(key: Preferences.Key<T>, fallback: T): T = this[key] ?: fallback
+
+    private fun Preferences.longValue(key: Preferences.Key<Int>, fallback: Long): Long = value(key, fallback.toInt()).toLong()
 
     private fun String?.toActionType(fallback: ActionType): ActionType {
         val stored = this

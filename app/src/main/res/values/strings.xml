@@ -46,4 +46,22 @@
     <string name="screenshot_unavailable">Screenshot unavailable on this device</string>
 
     <string name="panel_close">Close</string>
+
+    <string name="onboarding_intro_title">Welcome to Dotap</string>
+    <string name="onboarding_intro_desc">A fast, private floating shortcut dot that places essential system actions and screenshot captures right under your thumb.</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_disclosure_title">Why Dotap Needs Accessibility Service</string>
+    <string name="onboarding_disclosure_purpose_title">Service Purpose</string>
+    <string name="onboarding_disclosure_purpose_desc">Dotap uses Android\'s AccessibilityService API solely to:\n• Display the floating shortcut dot above other applications.\n• Perform global actions you trigger, such as taking screenshots, going Home, Back, or opening Notifications.</string>
+    <string name="onboarding_disclosure_privacy_title">Privacy Guarantee</string>
+    <string name="onboarding_disclosure_privacy_desc">• Dotap NEVER reads, captures, or transmits your screen content, typed text, or personal information.\n• Dotap operates entirely offline with zero network permissions.</string>
+    <string name="onboarding_agree_button">Agree &amp; Continue</string>
+    <string name="onboarding_not_now_button">Not Now</string>
+
+    <string name="status_enabled_not_connected">Service enabled but not connected. Try toggling it off and on in Settings.</string>
+    <string name="restricted_settings_help_button">Can\'t enable service? (Android 13+)</string>
+    <string name="restricted_settings_title">Allow Restricted Settings</string>
+    <string name="restricted_settings_message">If the Accessibility switch is grayed out on Android 13 or later:\n\n1. Tap \"Open App Info\" below.\n2. Tap the three dots (⋮) in the top-right corner.\n3. Tap \"Allow restricted settings\" and verify your PIN or fingerprint.\n4. Return here and tap \"Enable in Accessibility Settings\".</string>
+    <string name="open_app_info_button">Open App Info</string>
+    <string name="close_dialog_button">Close</string>
 </resources>

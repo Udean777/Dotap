@@ -1,6 +1,7 @@
 package com.ssajudn.dotap.domain.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -17,6 +18,7 @@ class DotSettingsTest {
         assertEquals(ActionType.OPEN_PANEL, settings.singleTapAction)
         assertEquals(ActionType.SCREENSHOT, settings.doubleTapAction)
         assertEquals(ActionType.NONE, settings.longPressAction)
+        assertFalse(settings.isOnboardingCompleted)
     }
 
     @Test

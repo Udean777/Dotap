@@ -2,10 +2,9 @@ package com.ssajudn.dotap.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ssajudn.dotap.domain.model.ServiceStatus
 import com.ssajudn.dotap.domain.port.DispatcherProvider
 import com.ssajudn.dotap.domain.repository.SettingsRepository
-import com.ssajudn.dotap.domain.status.ServiceConnectionTracker
+import com.ssajudn.dotap.domain.usecase.ObserveServiceStatusUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val dispatcherProvider: DispatcherProvider,
-    private val serviceConnectionTracker: ServiceConnectionTracker,
+    private val observeServiceStatusUseCase: ObserveServiceStatusUseCase,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -33,12 +32,7 @@ class HomeViewModel(
 
     private fun observeServiceStatus() {
         viewModelScope.launch(dispatcherProvider.main) {
-            serviceConnectionTracker.isConnected.collect { connected ->
-                val status = if (connected) {
-                    ServiceStatus.ENABLED_CONNECTED
-                } else {
-                    ServiceStatus.DISABLED
-                }
+            observeServiceStatusUseCase().collect { status ->
                 _uiState.update { it.copy(serviceStatus = status) }
             }
         }
@@ -54,18 +48,33 @@ class HomeViewModel(
 
     fun onEvent(event: HomeUiEvent) {
         viewModelScope.launch(dispatcherProvider.main) {
-            when (event) {
-                HomeUiEvent.OpenSettingsClicked -> {
-                    _uiEffect.send(HomeUiEffect.NavigateToSettings)
-                }
+            handleEvent(event)
+        }
+    }
 
-                HomeUiEvent.OpenAccessibilitySettingsClicked -> {
-                    _uiEffect.send(HomeUiEffect.OpenAccessibilitySettings)
-                }
+    private suspend fun handleEvent(event: HomeUiEvent) {
+        when (event) {
+            HomeUiEvent.OpenSettingsClicked -> _uiEffect.send(HomeUiEffect.NavigateToSettings)
 
-                is HomeUiEvent.DotVisibilityToggled -> {
-                    settingsRepository.update { it.copy(isDotEnabled = event.enabled) }
-                }
+            HomeUiEvent.OpenAccessibilitySettingsClicked -> {
+                _uiEffect.send(HomeUiEffect.OpenAccessibilitySettings)
+            }
+
+            is HomeUiEvent.DotVisibilityToggled -> {
+                settingsRepository.update { it.copy(isDotEnabled = event.enabled) }
+            }
+
+            HomeUiEvent.RestrictedSettingsHelpClicked -> {
+                _uiState.update { it.copy(showRestrictedSettingsDialog = true) }
+            }
+
+            HomeUiEvent.DismissRestrictedSettingsDialog -> {
+                _uiState.update { it.copy(showRestrictedSettingsDialog = false) }
+            }
+
+            HomeUiEvent.OpenAppInfoClicked -> {
+                _uiState.update { it.copy(showRestrictedSettingsDialog = false) }
+                _uiEffect.send(HomeUiEffect.OpenAppInfo)
             }
         }
     }

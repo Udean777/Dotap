@@ -46,4 +46,22 @@
     <string name="screenshot_unavailable">Tangkapan layar tidak tersedia di perangkat ini</string>
 
     <string name="panel_close">Tutup</string>
+
+    <string name="onboarding_intro_title">Selamat Datang di Dotap</string>
+    <string name="onboarding_intro_desc">Dot pintasan melayang yang cepat dan privat untuk meletakkan aksi sistem penting dan tangkapan layar tepat di ujung jari Anda.</string>
+    <string name="onboarding_get_started">Mulai</string>
+    <string name="onboarding_disclosure_title">Mengapa Dotap Memerlukan Layanan Aksesibilitas</string>
+    <string name="onboarding_disclosure_purpose_title">Tujuan Layanan</string>
+    <string name="onboarding_disclosure_purpose_desc">Dotap menggunakan AccessibilityService API Android hanya untuk:\n• Menampilkan tombol dot pintasan melayang di atas aplikasi lain.\n• Menjalankan tindakan sistem yang Anda picu, seperti mengambil tangkapan layar, kembali ke Home, Back, atau membuka Notifikasi.</string>
+    <string name="onboarding_disclosure_privacy_title">Jaminan Privasi</string>
+    <string name="onboarding_disclosure_privacy_desc">• Dotap TIDAK PERNAH membaca, merekam, atau mengirimkan konten layar, teks yang diketik, atau data pribadi Anda.\n• Dotap beroperasi sepenuhnya secara offline tanpa izin internet.</string>
+    <string name="onboarding_agree_button">Setuju &amp; Lanjutkan</string>
+    <string name="onboarding_not_now_button">Nanti Saja</string>
+
+    <string name="status_enabled_not_connected">Layanan aktif tetapi belum terhubung. Coba matikan lalu hidupkan kembali di Pengaturan.</string>
+    <string name="restricted_settings_help_button">Tidak bisa mengaktifkan layanan? (Android 13+)</string>
+    <string name="restricted_settings_title">Izinkan Setelan Terbatas</string>
+    <string name="restricted_settings_message">Jika tombol Aksesibilitas tidak dapat ditekan (abu-abu) di Android 13 ke atas:\n\n1. Ketuk \"Buka Info Aplikasi\" di bawah.\n2. Ketuk ikon titik tiga (⋮) di pojok kanan atas.\n3. Ketuk \"Izinkan setelan terbatas\" lalu verifikasi PIN atau sidik jari.\n4. Kembali ke sini dan ketuk \"Aktifkan di Pengaturan Aksesibilitas\".</string>
+    <string name="open_app_info_button">Buka Info Aplikasi</string>
+    <string name="close_dialog_button">Tutup</string>
 </resources>

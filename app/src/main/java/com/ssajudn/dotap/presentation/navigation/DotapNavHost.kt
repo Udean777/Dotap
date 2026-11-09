@@ -13,7 +13,10 @@ import com.ssajudn.dotap.presentation.appearance.AppearanceViewModel
 import com.ssajudn.dotap.presentation.gestures.GesturesRoute
 import com.ssajudn.dotap.presentation.gestures.GesturesViewModel
 import com.ssajudn.dotap.presentation.home.HomeRoute
+import com.ssajudn.dotap.presentation.home.HomeUiEffect
 import com.ssajudn.dotap.presentation.home.HomeViewModel
+import com.ssajudn.dotap.presentation.onboarding.OnboardingRoute
+import com.ssajudn.dotap.presentation.onboarding.OnboardingViewModel
 import com.ssajudn.dotap.presentation.settings.SettingsRoute
 import com.ssajudn.dotap.presentation.settings.SettingsUiEffect
 import com.ssajudn.dotap.presentation.settings.SettingsViewModel
@@ -21,27 +24,52 @@ import com.ssajudn.dotap.presentation.settings.SettingsViewModel
 @Composable
 fun DotapNavHost(
     factories: ScreenViewModelFactories,
-    onOpenAccessibilitySettings: () -> Unit,
+    systemActions: SystemActions,
+    startDestination: String = Destinations.HOME,
 ) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Destinations.HOME) {
-        homeDestination(navController, factories.home, onOpenAccessibilitySettings)
+    NavHost(navController = navController, startDestination = startDestination) {
+        onboardingDestination(navController, factories.onboarding, systemActions.onOpenAccessibilitySettings)
+        homeDestination(navController, factories.home, systemActions)
         settingsDestination(navController, factories.settings)
         gesturesDestination(navController, factories.gestures)
         appearanceDestination(navController, factories.appearance)
     }
 }
 
-private fun NavGraphBuilder.homeDestination(
+private fun NavGraphBuilder.onboardingDestination(
     navController: NavHostController,
     factory: ViewModelProvider.Factory,
     onOpenAccessibilitySettings: () -> Unit,
 ) {
+    composable(Destinations.ONBOARDING) {
+        OnboardingRoute(
+            viewModel = viewModel<OnboardingViewModel>(factory = factory),
+            onOpenAccessibilitySettings = onOpenAccessibilitySettings,
+            onNavigateToHome = {
+                navController.navigate(Destinations.HOME) {
+                    popUpTo(Destinations.ONBOARDING) { inclusive = true }
+                }
+            },
+        )
+    }
+}
+
+private fun NavGraphBuilder.homeDestination(
+    navController: NavHostController,
+    factory: ViewModelProvider.Factory,
+    systemActions: SystemActions,
+) {
     composable(Destinations.HOME) {
         HomeRoute(
             viewModel = viewModel(factory = factory),
-            onNavigateToSettings = { navController.navigate(Destinations.SETTINGS) },
-            onOpenAccessibilitySettings = onOpenAccessibilitySettings,
+            onEffect = { effect ->
+                when (effect) {
+                    HomeUiEffect.NavigateToSettings -> navController.navigate(Destinations.SETTINGS)
+                    HomeUiEffect.OpenAccessibilitySettings -> systemActions.onOpenAccessibilitySettings()
+                    HomeUiEffect.OpenAppInfo -> systemActions.onOpenAppInfo()
+                }
+            },
         )
     }
 }

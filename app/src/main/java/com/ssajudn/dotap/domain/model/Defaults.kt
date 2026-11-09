@@ -13,6 +13,7 @@ object Defaults {
     const val SNAP_TO_EDGE: Boolean = true
     const val DOT_SIDE_RIGHT: Boolean = true
     const val DOT_Y_RATIO: Float = 0.4f
+    const val ONBOARDING_COMPLETED: Boolean = false
 
     val ACTION_SINGLE_TAP: ActionType = ActionType.OPEN_PANEL
     val ACTION_DOUBLE_TAP: ActionType = ActionType.SCREENSHOT

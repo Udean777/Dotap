@@ -20,6 +20,7 @@ internal object SettingsKeys {
     val SNAP_TO_EDGE = booleanPreferencesKey("snap_to_edge")
     val DOT_SIDE = stringPreferencesKey("dot_side")
     val DOT_Y_RATIO = floatPreferencesKey("dot_y_ratio")
+    val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 }
 
 internal const val SIDE_RIGHT = "RIGHT"

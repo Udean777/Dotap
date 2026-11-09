@@ -55,13 +55,13 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 
 ## M5 — Onboarding and compliance (FR-40, FR-41, FR-44, FR-47)
 
-- [ ] **M5.1** Onboarding flow with `OnboardingViewModel`: intro → prominent disclosure screen (text from `COMPLIANCE.md`, explicit Agree) → effect that opens Accessibility settings. Unit-test that the settings effect is emitted only after consent.
+- [x] **M5.1** Onboarding flow with `OnboardingViewModel`: intro → prominent disclosure screen (text from `COMPLIANCE.md`, explicit Agree) → effect that opens Accessibility settings. Unit-test that the settings effect is emitted only after consent.
   *Accept:* the disclosure is a separate screen, not buried in a privacy policy; the user cannot reach the system settings button without agreeing.
-- [ ] **M5.2** `ServiceStatusRepository` (`AccessibilityStatusRepository`) using the system enabled-services list, combined with the `ServiceConnectionTracker` hint in `ObserveServiceStatusUseCase`. Home screen shows the status with a button to open settings. Unit-test the use case for all three `ServiceStatus` values.
+- [x] **M5.2** `ServiceStatusRepository` (`AccessibilityStatusRepository`) using the system enabled-services list, combined with the `ServiceConnectionTracker` hint in `ObserveServiceStatusUseCase`. Home screen shows the status with a button to open settings. Unit-test the use case for all three `ServiceStatus` values.
   *Accept:* status is right after process death and after the user disables the service from system settings.
-- [ ] **M5.3** Android 13+ restricted-settings guidance for sideloaded installs.
+- [x] **M5.3** Android 13+ restricted-settings guidance for sideloaded installs.
   *Accept:* a help screen explains where to allow restricted settings; tested on an Android 13+ device with a sideloaded APK.
-- [ ] **M5.4** Prepare store materials: privacy policy page (no data collected), short and full description, screenshots, Data Safety answers, Permission Declaration draft, demo video script. See `COMPLIANCE.md`.
+- [x] **M5.4** Prepare store materials: privacy policy page (no data collected), short and full description, screenshots, Data Safety answers, Permission Declaration draft, demo video script. See `COMPLIANCE.md`.
   *Accept:* checklist in `COMPLIANCE.md` is complete.
 
 ## M6 — Polish and release (FR-45, FR-46, NFR-4 to NFR-8)

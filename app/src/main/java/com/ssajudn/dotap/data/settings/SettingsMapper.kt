@@ -75,6 +75,7 @@ internal class SettingsMapper {
             ?.mapNotNull { name ->
                 ActionType.entries.firstOrNull { it.name == name.trim() }
             }
+            ?.filter { it.canBePanelSlot }
             .orEmpty()
         return if (parsed.size in Limits.MIN_PANEL_SLOTS..Limits.MAX_PANEL_SLOTS) parsed else fallback
     }

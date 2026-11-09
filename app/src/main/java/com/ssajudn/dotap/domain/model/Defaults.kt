@@ -14,7 +14,7 @@ object Defaults {
     const val DOT_SIDE_RIGHT: Boolean = true
     const val DOT_Y_RATIO: Float = 0.4f
 
-    val ACTION_SINGLE_TAP: ActionType = ActionType.HOME
+    val ACTION_SINGLE_TAP: ActionType = ActionType.OPEN_PANEL
     val ACTION_DOUBLE_TAP: ActionType = ActionType.SCREENSHOT
     val ACTION_LONG_PRESS: ActionType = ActionType.NONE
 

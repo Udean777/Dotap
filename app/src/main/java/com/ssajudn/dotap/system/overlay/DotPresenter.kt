@@ -1,10 +1,13 @@
 package com.ssajudn.dotap.system.overlay
 
+import com.ssajudn.dotap.domain.model.Defaults
 import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.GestureType
 import com.ssajudn.dotap.domain.model.Limits
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +22,15 @@ class DotPresenter(
     val uiState: StateFlow<DotUiState> = _uiState.asStateFlow()
 
     private var isActionRunning = false
+    private var idleJob: Job? = null
+    private var idleDelayMs: Long = Defaults.IDLE_DELAY_MS
+    private var targetIdleAlpha: Float =
+        Defaults.IDLE_OPACITY_PERCENT.toFloat() / Limits.MAX_IDLE_OPACITY_PERCENT
+    private var isTouchActive: Boolean = false
+
+    init {
+        restartIdleTimer()
+    }
 
     fun onGesture(gesture: GestureType) {
         val useCase = handleGestureUseCase
@@ -33,6 +45,20 @@ class DotPresenter(
                 isActionRunning = false
             }
         }
+    }
+
+    fun onTouchActive() {
+        isTouchActive = true
+        idleJob?.cancel()
+        idleJob = null
+        if (_uiState.value.alpha != FULL_ALPHA) {
+            _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA)
+        }
+    }
+
+    fun onTouchFinished() {
+        isTouchActive = false
+        restartIdleTimer()
     }
 
     fun setVisible(visible: Boolean) {
@@ -54,6 +80,8 @@ class DotPresenter(
 
     fun applySettings(settings: DotSettings) {
         val current = _uiState.value
+        idleDelayMs = settings.idleDelayMs
+        targetIdleAlpha = settings.idleAlpha
         _uiState.value = current.copy(
             isVisible = settings.isDotEnabled,
             dotSizeDp = settings.dotSizeDp.coerceIn(Limits.MIN_DOT_SIZE_DP, Limits.MAX_DOT_SIZE_DP),
@@ -67,6 +95,9 @@ class DotPresenter(
                 current.xRatio
             },
         )
+        if (!isTouchActive) {
+            restartIdleTimer()
+        }
     }
 
     fun updateAlpha(alpha: Float) {
@@ -76,5 +107,24 @@ class DotPresenter(
     fun updateDotSize(sizeDp: Int) {
         val clampedSize = sizeDp.coerceIn(Limits.MIN_DOT_SIZE_DP, Limits.MAX_DOT_SIZE_DP)
         _uiState.value = _uiState.value.copy(dotSizeDp = clampedSize)
+    }
+
+    private fun restartIdleTimer() {
+        idleJob?.cancel()
+        if (targetIdleAlpha >= FULL_ALPHA) {
+            if (_uiState.value.alpha != FULL_ALPHA) {
+                _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA)
+            }
+            return
+        }
+        val coroutineScope = scope ?: return
+        idleJob = coroutineScope.launch {
+            delay(idleDelayMs)
+            _uiState.value = _uiState.value.copy(alpha = targetIdleAlpha)
+        }
+    }
+
+    private companion object {
+        const val FULL_ALPHA = 1.0f
     }
 }

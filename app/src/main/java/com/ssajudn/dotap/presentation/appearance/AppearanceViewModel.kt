@@ -32,6 +32,14 @@ class AppearanceViewModel(
                 is AppearanceUiEvent.SnapToEdgeToggled -> settingsRepository.update {
                     it.copy(isSnapToEdgeEnabled = event.enabled)
                 }
+
+                is AppearanceUiEvent.DotSizeChanged -> settingsRepository.update {
+                    it.withDotSize(event.sizeDp)
+                }
+
+                is AppearanceUiEvent.IdleOpacityChanged -> settingsRepository.update {
+                    it.withIdleOpacity(event.opacityPercent)
+                }
             }
         }
     }

@@ -2,20 +2,12 @@ package com.ssajudn.dotap.system.overlay
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.PixelFormat
-import android.graphics.Point
-import android.os.Build
 import android.util.Log
-import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
-import androidx.core.animation.doOnEnd
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.gesture.GestureEngine
-import com.ssajudn.dotap.domain.model.Limits
 import com.ssajudn.dotap.domain.model.MessageType
 import com.ssajudn.dotap.domain.port.OverlayVisibility
 
@@ -50,7 +42,11 @@ class OverlayController(
         val params = buildLayoutParams(state, dotSizePx, screenSize)
         layoutParams = params
 
-        val view = createDotView(context, { gestureEngine }, { accessibilityClick?.invoke() })
+        val view = createDotView(
+            context = context,
+            onTouch = { _, event -> handleTouchEvent(event, presenter, gestureEngine) },
+            onClick = { accessibilityClick?.invoke() },
+        )
         view.render(state)
         if (attachOverlayView(windowManager, view, params)) {
             dotView = view
@@ -137,26 +133,18 @@ class OverlayController(
         try {
             windowManager.updateViewLayout(view, params)
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Error updating during drag", e)
+            Log.e(TAG, "IllegalArgumentException updating view on drag", e)
         }
     }
 
     fun onDragEnd() {
-        val params = layoutParams ?: return
         val view = dotView ?: return
+        val params = layoutParams ?: return
         val metrics = measureDrag(view, params, windowManager)
-
-        snapAnimator?.cancel()
-        snapAnimator = null
 
         if (presenter.uiState.value.isSnapToEdgeEnabled) {
             val animator = createSnapAnimator(metrics, windowManager) {
-                snapAnimator = null
-                presenter.updatePosition(
-                    isRightSide = metrics.isRight,
-                    yRatio = metrics.yRatio,
-                    xRatio = if (metrics.isRight) 1f else 0f,
-                )
+                presenter.updatePosition(metrics.isRight, metrics.yRatio)
                 onPositionSettled?.invoke(metrics.isRight, metrics.yRatio)
             }
             snapAnimator = animator
@@ -187,139 +175,8 @@ class OverlayController(
         }
         Toast.makeText(context, textRes, Toast.LENGTH_SHORT).show()
     }
-}
 
-private fun createDotView(
-    context: Context,
-    engineProvider: () -> GestureEngine?,
-    onAccessibilityClick: () -> Unit,
-): DotView = DotView(
-    context = context,
-    onTouchListener = { _, event ->
-        val engine = engineProvider()
-        if (engine != null) {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> engine.down(event.rawX, event.rawY)
-                MotionEvent.ACTION_MOVE -> engine.move(event.rawX, event.rawY)
-                MotionEvent.ACTION_UP -> engine.up()
-                MotionEvent.ACTION_CANCEL -> engine.cancel()
-            }
-            true
-        } else {
-            false
-        }
-    },
-    onClickAction = onAccessibilityClick,
-)
-
-private fun attachOverlayView(
-    windowManager: WindowManager,
-    view: View,
-    params: WindowManager.LayoutParams,
-): Boolean = try {
-    windowManager.addView(view, params)
-    true
-} catch (e: WindowManager.BadTokenException) {
-    Log.e("OverlayController", "BadTokenException adding overlay view", e)
-    false
-} catch (e: IllegalArgumentException) {
-    Log.e("OverlayController", "IllegalArgumentException adding overlay view", e)
-    false
-}
-
-private fun getScreenSize(windowManager: WindowManager): Point = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-    val bounds = windowManager.currentWindowMetrics.bounds
-    Point(bounds.width(), bounds.height())
-} else {
-    val point = Point()
-    @Suppress("DEPRECATION")
-    windowManager.defaultDisplay.getSize(point)
-    point
-}
-
-private fun buildLayoutParams(
-    state: DotUiState,
-    dotSizePx: Int,
-    screenSize: Point,
-): WindowManager.LayoutParams {
-    val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
-    return WindowManager.LayoutParams(
-        dotSizePx,
-        dotSizePx,
-        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-        PixelFormat.TRANSLUCENT,
-    ).apply {
-        gravity = Gravity.TOP or Gravity.START
-        x = resolveX(state, dotSizePx, screenSize)
-        y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
+    private companion object {
+        const val TAG = "OverlayController"
     }
 }
-
-private fun resolveX(state: DotUiState, dotSizePx: Int, screenSize: Point): Int {
-    val maxX = (screenSize.x - dotSizePx).coerceAtLeast(0)
-    return when {
-        state.isSnapToEdgeEnabled && state.isRightSide -> maxX
-        state.isSnapToEdgeEnabled -> 0
-        else -> (maxX * state.xRatio).toInt().coerceIn(0, maxX)
-    }
-}
-
-private fun Context.dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
-
-private fun measureDrag(
-    view: View,
-    params: WindowManager.LayoutParams,
-    windowManager: WindowManager,
-): DragMetrics {
-    val screenSize = getScreenSize(windowManager)
-    val dotSizePx = view.width
-    val startX = params.x
-    val maxX = (screenSize.x - dotSizePx).coerceAtLeast(1)
-    val maxY = (screenSize.y - dotSizePx).coerceAtLeast(1)
-    val isRight = (startX + dotSizePx / 2) >= screenSize.x / 2
-    return DragMetrics(
-        view = view,
-        params = params,
-        startX = startX,
-        isRight = isRight,
-        xRatio = (startX.toFloat() / maxX).coerceIn(0f, 1f),
-        yRatio = (params.y.toFloat() / maxY).coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO),
-        targetX = if (isRight) screenSize.x - dotSizePx else 0,
-    )
-}
-
-private fun createSnapAnimator(
-    metrics: DragMetrics,
-    windowManager: WindowManager,
-    onSettled: () -> Unit,
-): ValueAnimator {
-    val animator = ValueAnimator.ofInt(metrics.startX, metrics.targetX)
-    animator.duration = SNAP_ANIMATION_DURATION_MS
-    animator.interpolator = DecelerateInterpolator()
-    animator.addUpdateListener { valueAnimator ->
-        metrics.params.x = valueAnimator.animatedValue as Int
-        try {
-            windowManager.updateViewLayout(metrics.view, metrics.params)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Error during snap animation", e)
-        }
-    }
-    // Publish the new position only once settled, otherwise the state collector jumps the dot mid-animation.
-    animator.doOnEnd { onSettled() }
-    return animator
-}
-
-private const val TAG = "OverlayController"
-private const val SNAP_ANIMATION_DURATION_MS = 250L
-
-private data class DragMetrics(
-    val view: View,
-    val params: WindowManager.LayoutParams,
-    val startX: Int,
-    val targetX: Int,
-    val isRight: Boolean,
-    val xRatio: Float,
-    val yRatio: Float,
-)

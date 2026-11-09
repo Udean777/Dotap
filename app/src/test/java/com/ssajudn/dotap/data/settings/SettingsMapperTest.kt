@@ -63,6 +63,27 @@ class SettingsMapperTest {
     }
 
     @Test
+    fun `panel slots drop actions that cannot be slots`() {
+        val preferences = mutablePreferencesOf(
+            SettingsKeys.PANEL_SLOTS to "HOME,OPEN_PANEL,BACK,NONE,RECENTS",
+        )
+
+        assertEquals(
+            listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS),
+            mapper.toDomain(preferences).panelSlots,
+        )
+    }
+
+    @Test
+    fun `panel slots fall back to defaults when too few real slots remain`() {
+        val preferences = mutablePreferencesOf(
+            SettingsKeys.PANEL_SLOTS to "HOME,OPEN_PANEL,NONE",
+        )
+
+        assertEquals(Defaults.DEFAULT_PANEL_SLOTS, mapper.toDomain(preferences).panelSlots)
+    }
+
+    @Test
     fun `panel slots with an invalid size fall back to defaults`() {
         val preferences = mutablePreferencesOf(
             SettingsKeys.PANEL_SLOTS to "HOME",

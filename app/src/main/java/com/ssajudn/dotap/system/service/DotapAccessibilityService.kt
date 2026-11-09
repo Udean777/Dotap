@@ -5,6 +5,9 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.view.ViewConfiguration
 import android.view.accessibility.AccessibilityEvent
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ssajudn.dotap.DotapApp
 import com.ssajudn.dotap.domain.gesture.GestureConfig
 import com.ssajudn.dotap.domain.gesture.GestureEngine
@@ -17,10 +20,13 @@ import com.ssajudn.dotap.domain.port.OverlayVisibility
 import com.ssajudn.dotap.domain.usecase.ExecuteActionUseCase
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
 import com.ssajudn.dotap.domain.usecase.TakeScreenshotUseCase
+import com.ssajudn.dotap.presentation.panel.PanelRoute
+import com.ssajudn.dotap.presentation.panel.PanelViewModel
 import com.ssajudn.dotap.system.overlay.AndroidHapticFeedback
 import com.ssajudn.dotap.system.overlay.DotPresenter
 import com.ssajudn.dotap.system.overlay.HandlerScheduler
 import com.ssajudn.dotap.system.overlay.OverlayController
+import com.ssajudn.dotap.system.overlay.PanelHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -33,6 +39,7 @@ class DotapAccessibilityService : AccessibilityService() {
     private var serviceScope: CoroutineScope? = null
     private var overlayController: OverlayController? = null
     private var presenter: DotPresenter? = null
+    private var panelHost: PanelHost? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -68,6 +75,8 @@ class DotapAccessibilityService : AccessibilityService() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        // Rotation or folding invalidates the panel's anchor, so dismiss it (ARCHITECTURE §12).
+        panelHost?.close()
         overlayController?.onConfigurationChanged()
     }
 
@@ -95,28 +104,46 @@ class DotapAccessibilityService : AccessibilityService() {
     ): Pair<DotPresenter, OverlayController> {
         val actionPerformer = GlobalActionPerformer(this)
         var controllerRef: OverlayController? = null
+        var executeUseCaseRef: ExecuteActionUseCase? = null
 
-        val visibilityBridge = object : OverlayVisibility {
-            override fun hideForCapture() {
-                controllerRef?.hideForCapture()
-            }
-            override fun restoreAfterCapture() {
-                controllerRef?.restoreAfterCapture()
-            }
-            override fun showMessage(message: MessageType) {
-                controllerRef?.showMessage(message)
-            }
-        }
+        val host = buildPanelHost(scope) { executeUseCaseRef }
+        panelHost = host
 
-        val screenshotUseCase = TakeScreenshotUseCase(visibilityBridge, actionPerformer)
-        val executeUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase)
+        val screenshotUseCase = TakeScreenshotUseCase(
+            overlayVisibility = overlayVisibilityBridge({ controllerRef }, { panelHost }),
+            actionPerformer = actionPerformer,
+        )
+        val executeUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase, host)
+        executeUseCaseRef = executeUseCase
+
         val haptic = AndroidHapticFeedback { controllerRef?.view }
         val handleGesture = HandleGestureUseCase(app.container.settingsRepository, haptic, executeUseCase)
-
         val dotPresenter = DotPresenter(handleGestureUseCase = handleGesture, scope = scope)
         val controller = OverlayController(this, dotPresenter)
         controllerRef = controller
         return dotPresenter to controller
+    }
+
+    private fun buildPanelHost(
+        scope: CoroutineScope,
+        executeActionProvider: () -> ExecuteActionUseCase?,
+    ): PanelHost {
+        val app = applicationContext as DotapApp
+        val factory = viewModelFactory {
+            initializer {
+                PanelViewModel(
+                    settingsRepository = app.container.settingsRepository,
+                    executeAction = checkNotNull(executeActionProvider()) { "executeAction not initialized" },
+                    actionScope = scope,
+                    dispatcherProvider = app.container.dispatcherProvider,
+                )
+            }
+        }
+        return PanelHost(
+            context = this,
+            anchorProvider = { overlayController?.view },
+            content = { onClose -> PanelRoute(onClose = onClose, viewModel = viewModel(factory = factory)) },
+        )
     }
 
     private fun buildGestureEngine(
@@ -138,11 +165,32 @@ class DotapAccessibilityService : AccessibilityService() {
     private fun cleanup() {
         val app = applicationContext as? DotapApp
         app?.container?.serviceConnectionTracker?.setConnected(false)
+        panelHost?.close()
+        panelHost = null
         overlayController?.hide()
         overlayController = null
         presenter = null
         serviceScope?.cancel()
         serviceScope = null
+    }
+}
+
+// The controller and panel host exist after the use cases are built, so they are resolved lazily on every call.
+private fun overlayVisibilityBridge(
+    controller: () -> OverlayController?,
+    panelHost: () -> PanelHost?,
+): OverlayVisibility = object : OverlayVisibility {
+    override fun hideForCapture() {
+        panelHost()?.close()
+        controller()?.hideForCapture()
+    }
+
+    override fun restoreAfterCapture() {
+        controller()?.restoreAfterCapture()
+    }
+
+    override fun showMessage(message: MessageType) {
+        controller()?.showMessage(message)
     }
 }
 

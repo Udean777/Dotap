@@ -46,11 +46,11 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 
 ## M4 — Quick-action panel (FR-30, FR-31, FR-33)
 
-- [ ] **M4.1** `OverlayLifecycleOwner` (lifecycle, saved-state, and ViewModelStore owner) and `PanelHost` showing a `ComposeView` panel as an accessibility overlay; implement the `PanelLauncher` port.
+- [x] **M4.1** `OverlayLifecycleOwner` (lifecycle, saved-state, and ViewModelStore owner) and `PanelHost` showing a `ComposeView` panel as an accessibility overlay; implement the `PanelLauncher` port.
   *Accept:* panel opens next to the dot, no crash on rapid open/close, no leaked views after close.
-- [ ] **M4.2** Panel UI with `PanelViewModel` (`PanelUiState`, `PanelUiEvent`, close effect): rounded 3×3 grid, centre Close cell, default six slots, tap-outside/Back dismiss. Add `OPEN_PANEL` action and make it the default single-tap action. Unit-test `PanelViewModel`.
+- [x] **M4.2** Panel UI with `PanelViewModel` (`PanelUiState`, `PanelUiEvent`, close effect): rounded 3×3 grid, centre Close cell, default six slots, tap-outside/Back dismiss. Add `OPEN_PANEL` action and make it the default single-tap action. Unit-test `PanelViewModel`.
   *Accept:* every slot runs its action and closes the panel; Screenshot from the panel hides panel and dot before capture.
-- [ ] **M4.3** Idle opacity and dot size: add the settings controls (Appearance screen) and apply them live (FR-3, FR-4).
+- [x] **M4.3** Idle opacity and dot size: add the settings controls (Appearance screen) and apply them live (FR-3, FR-4).
   *Accept:* dot fades after the idle delay and returns on touch; size slider resizes the dot immediately.
 
 ## M5 — Onboarding and compliance (FR-40, FR-41, FR-44, FR-47)

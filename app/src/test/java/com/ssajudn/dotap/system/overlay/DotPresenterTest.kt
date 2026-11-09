@@ -14,10 +14,13 @@ import com.ssajudn.dotap.domain.repository.SettingsRepository
 import com.ssajudn.dotap.domain.usecase.ExecuteActionUseCase
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
 import com.ssajudn.dotap.domain.usecase.TakeScreenshotUseCase
+import com.ssajudn.dotap.testutil.FakePanelLauncher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -181,6 +184,7 @@ class DotPresenterTest {
             ExecuteActionUseCase(
                 performer,
                 TakeScreenshotUseCase(NoopOverlayVisibility, performer, hideDelayMs = 150L, restoreDelayMs = 800L),
+                FakePanelLauncher(),
             ),
         )
         val presenter = DotPresenter(handleGestureUseCase = useCase, scope = this)
@@ -195,6 +199,49 @@ class DotPresenterTest {
         advanceUntilIdle()
 
         assertEquals(2, performer.count)
+    }
+
+    @Test
+    fun `idle opacity fades after idle delay and returns on touch active`() = runTest {
+        val presenter = DotPresenter(scope = this)
+        presenter.applySettings(
+            DotSettings(
+                idleOpacityPercent = 40,
+                idleDelayMs = 3000L,
+            ),
+        )
+
+        assertEquals(1.0f, presenter.uiState.value.alpha, 0.001f)
+
+        advanceTimeBy(3000L)
+        runCurrent()
+        assertEquals(0.4f, presenter.uiState.value.alpha, 0.001f)
+
+        presenter.onTouchActive()
+        assertEquals(1.0f, presenter.uiState.value.alpha, 0.001f)
+
+        presenter.onTouchFinished()
+        advanceTimeBy(2999L)
+        runCurrent()
+        assertEquals(1.0f, presenter.uiState.value.alpha, 0.001f)
+
+        advanceTimeBy(1L)
+        runCurrent()
+        assertEquals(0.4f, presenter.uiState.value.alpha, 0.001f)
+    }
+
+    @Test
+    fun `idle opacity of 100 percent never fades`() = runTest {
+        val presenter = DotPresenter(scope = this)
+        presenter.applySettings(
+            DotSettings(
+                idleOpacityPercent = 100,
+                idleDelayMs = 3000L,
+            ),
+        )
+
+        advanceTimeBy(5000L)
+        assertEquals(1.0f, presenter.uiState.value.alpha, 0.001f)
     }
 
     private class CountingActionPerformer : ActionPerformer {

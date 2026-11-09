@@ -43,13 +43,18 @@ class DotView(
     }
 
     fun render(state: DotUiState) {
+        animate().cancel()
         if (!state.isVisible || state.isHiddenForCapture) {
             visibility = GONE
             alpha = 0f
             updateExclusionRects(false)
         } else {
             visibility = VISIBLE
-            alpha = state.alpha
+            if (state.alpha >= 1f || alpha == 0f) {
+                alpha = state.alpha
+            } else {
+                animate().alpha(state.alpha).setDuration(FADE_DURATION_MS).start()
+            }
             updateExclusionRects(true)
         }
         invalidate()
@@ -99,6 +104,7 @@ class DotView(
     private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density
 
     companion object {
+        private const val FADE_DURATION_MS = 250L
         private const val OUTER_RING_STROKE_DP = 1.5f
         private const val RING_RATIO = 0.72f
         private const val CENTER_DOT_RATIO = 0.35f

@@ -218,7 +218,7 @@ private data class SliderSpec(
 
 private fun Int.roundToMultiple(step: Int): Int = (this.toFloat() / step).roundToInt() * step
 
-private val SELECTABLE_ACTIONS: List<ActionType> = ActionType.entries.filterNot { it == ActionType.OPEN_PANEL }
+private val SELECTABLE_ACTIONS: List<ActionType> = ActionType.entries
 
 private val DOUBLE_TAP_SPEC = SliderSpec(
     labelRes = R.string.double_tap_timeout_label,

@@ -33,7 +33,8 @@ class PanelHost(
 
     override fun open() {
         if (shownPanel != null) return
-        val anchor = anchorProvider()?.screenBounds() ?: return
+        val anchorView = anchorProvider()
+        val anchor = anchorView?.screenBounds() ?: return
 
         val owner = OverlayLifecycleOwner()
         val view = createComposeView(owner)
@@ -42,6 +43,7 @@ class PanelHost(
         if (attach(view, buildLayoutParams(anchor))) {
             view.requestFocus()
             shownPanel = ShownPanel(view, owner)
+            (anchorView as? DotView)?.animateMenuState(isOpen = true)
         } else {
             owner.destroy()
         }
@@ -56,6 +58,7 @@ class PanelHost(
             Log.e(TAG, "IllegalArgumentException removing panel view", e)
         } finally {
             panel.owner.destroy()
+            (anchorProvider() as? DotView)?.animateMenuState(isOpen = false)
         }
     }
 

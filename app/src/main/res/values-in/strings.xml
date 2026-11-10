@@ -89,4 +89,19 @@
     <string name="battery_steps_vivo">1. Buka Pengaturan > Baterai > Manajemen konsumsi daya latar belakang tinggi.\n2. Cari Dotap lalu pilih \"Konsumsi daya latar belakang tinggi\" / \"Jangan batasi\".\n3. Aktifkan Mulai Otomatis di Pengelola Izin.</string>
     <string name="battery_steps_huawei">1. Buka Pengaturan > Baterai > Peluncuran aplikasi.\n2. Matikan \"Kelola secara otomatis\" untuk Dotap.\n3. Aktifkan \"Mulai otomatis\", \"Mulai sekunder\", dan \"Jalankan di latar belakang\".</string>
     <string name="battery_steps_other">1. Buka Pengaturan > Aplikasi > Dotap > Penggunaan baterai aplikasi.\n2. Pilih \"Tidak dibatasi\" atau nonaktifkan pengoptimalan baterai.\n3. Pastikan aktivitas latar belakang diizinkan.</string>
+    <string name="status_enabled_desc">Dot melayang aktif dan siap di atas layar Anda.</string>
+    <string name="status_disabled_desc">Aktifkan aksesibilitas untuk menampilkan dot melayang dan pintasan.</string>
+    <string name="status_not_connected_desc">Layanan aktif di setelan Android tetapi belum terhubung. Coba matikan lalu nyalakan.</string>
+    <string name="dot_preview_label">Pratinjau Dot Langsung</string>
+    <string name="dot_preview_desc">Pratinjau visual ukuran dan opasitas saat idle</string>
+    <string name="home_section_customize">Kustomisasi Dotap</string>
+    <string name="home_section_controls">Kontrol</string>
+    <string name="appearance_preview_section">Pratinjau Langsung</string>
+    <string name="appearance_behavior_section">Perilaku</string>
+    <string name="appearance_dimensions_section">Ukuran &amp; Opasitas</string>
+    <string name="gestures_actions_section">Aksi</string>
+    <string name="gestures_timing_section">Waktu</string>
+    <string name="accessibility_icon_desc">Aksesibilitas</string>
+    <string name="privacy_icon_desc">Privasi</string>
+    <string name="back_icon_desc">Kembali</string>
 </resources>

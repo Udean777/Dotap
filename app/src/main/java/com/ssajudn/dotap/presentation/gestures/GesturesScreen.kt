@@ -1,33 +1,33 @@
 package com.ssajudn.dotap.presentation.gestures
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuBoxScope
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -36,10 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
-import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.Limits
-import com.ssajudn.dotap.presentation.common.labelRes
+import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 import kotlin.math.roundToInt
 
@@ -52,7 +51,6 @@ fun GesturesRoute(
     GesturesScreen(state = state, onEvent = viewModel::onEvent, onBack = onBack)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GesturesScreen(
     state: GesturesUiState,
@@ -60,19 +58,37 @@ fun GesturesScreen(
     onBack: () -> Unit,
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.gestures_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(text = stringResource(R.string.back_button))
-                    }
-                },
-            )
-        },
+        topBar = { GesturesTopAppBar(onBack = onBack) },
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
         GesturesBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GesturesTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.gestures_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
 }
 
 @Composable
@@ -86,98 +102,69 @@ private fun GesturesBody(
             .fillMaxSize()
             .padding(innerPadding)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        GestureActions(settings = state.settings, onEvent = onEvent)
-        GestureTimings(settings = state.settings, onEvent = onEvent)
+        ExpressiveSectionHeader(text = stringResource(R.string.gestures_actions_section))
+        GestureActionsCard(settings = state.settings, onEvent = onEvent)
+
+        ExpressiveSectionHeader(text = stringResource(R.string.gestures_timing_section))
+        TimingCard(settings = state.settings, onEvent = onEvent)
     }
 }
 
 @Composable
-private fun GestureActions(
+private fun TimingCard(
     settings: DotSettings,
     onEvent: (GesturesUiEvent) -> Unit,
 ) {
-    ActionDropdown(
-        labelRes = R.string.gesture_single_tap_label,
-        selected = settings.singleTapAction,
-        onSelected = { onEvent(GesturesUiEvent.SingleTapActionSelected(it)) },
-    )
-    ActionDropdown(
-        labelRes = R.string.gesture_double_tap_label,
-        selected = settings.doubleTapAction,
-        onSelected = { onEvent(GesturesUiEvent.DoubleTapActionSelected(it)) },
-    )
-    ActionDropdown(
-        labelRes = R.string.gesture_long_press_label,
-        selected = settings.longPressAction,
-        onSelected = { onEvent(GesturesUiEvent.LongPressActionSelected(it)) },
-    )
-}
-
-@Composable
-private fun GestureTimings(
-    settings: DotSettings,
-    onEvent: (GesturesUiEvent) -> Unit,
-) {
-    TimeoutSlider(
-        spec = DOUBLE_TAP_SPEC,
-        valueMs = settings.doubleTapTimeoutMs.toInt(),
-        onChange = { onEvent(GesturesUiEvent.DoubleTapTimeoutChanged(it)) },
-    )
-    TimeoutSlider(
-        spec = LONG_PRESS_SPEC,
-        valueMs = settings.longPressDurationMs.toInt(),
-        onChange = { onEvent(GesturesUiEvent.LongPressDurationChanged(it)) },
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ActionDropdown(
-    @StringRes labelRes: Int,
-    selected: ActionType,
-    onSelected: (ActionType) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it },
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
     ) {
-        OutlinedTextField(
-            value = stringResource(selected.labelRes()),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(text = stringResource(labelRes)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-        )
-        ActionMenu(
-            expanded = expanded,
-            onDismiss = { expanded = false },
-            onSelected = {
-                onSelected(it)
-                expanded = false
-            },
-        )
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            TimeoutSlider(
+                spec = DOUBLE_TAP_SPEC,
+                valueMs = settings.doubleTapTimeoutMs.toInt(),
+                onChange = { onEvent(GesturesUiEvent.DoubleTapTimeoutChanged(it)) },
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            TimeoutSlider(
+                spec = LONG_PRESS_SPEC,
+                valueMs = settings.longPressDurationMs.toInt(),
+                onChange = { onEvent(GesturesUiEvent.LongPressDurationChanged(it)) },
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExposedDropdownMenuBoxScope.ActionMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    onSelected: (ActionType) -> Unit,
-) {
-    ExposedDropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        SELECTABLE_ACTIONS.forEach { action ->
-            DropdownMenuItem(
-                text = { Text(text = stringResource(action.labelRes())) },
-                onClick = { onSelected(action) },
+private fun TimeoutSliderHeader(label: String, valueText: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+        ) {
+            Text(
+                text = valueText,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }
     }
@@ -191,9 +178,8 @@ private fun TimeoutSlider(
 ) {
     val label = stringResource(spec.labelRes)
     val valueText = stringResource(R.string.timeout_value, valueMs)
-    Column {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        Text(text = valueText, style = MaterialTheme.typography.bodyMedium)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        TimeoutSliderHeader(label = label, valueText = valueText)
         Slider(
             modifier = Modifier.semantics {
                 contentDescription = label
@@ -217,8 +203,6 @@ private data class SliderSpec(
 }
 
 private fun Int.roundToMultiple(step: Int): Int = (this.toFloat() / step).roundToInt() * step
-
-private val SELECTABLE_ACTIONS: List<ActionType> = ActionType.entries
 
 private val DOUBLE_TAP_SPEC = SliderSpec(
     labelRes = R.string.double_tap_timeout_label,

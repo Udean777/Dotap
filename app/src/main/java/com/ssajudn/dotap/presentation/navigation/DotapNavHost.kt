@@ -31,7 +31,14 @@ fun DotapNavHost(
     startDestination: String = Destinations.HOME,
 ) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination,
+        enterTransition = { navEnterTransition() },
+        exitTransition = { navExitTransition() },
+        popEnterTransition = { navPopEnterTransition() },
+        popExitTransition = { navPopExitTransition() },
+    ) {
         onboardingDestination(navController, factories.onboarding, systemActions.onOpenAccessibilitySettings)
         homeDestination(navController, factories.home, systemActions)
         settingsDestination(navController, factories.settings)

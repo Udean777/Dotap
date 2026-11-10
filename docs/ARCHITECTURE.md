@@ -77,18 +77,22 @@ com.ssajudn.dotap
 │                                TakeScreenshotUseCase, ObserveServiceStatusUseCase
 ├── data/
 │   ├── settings/                DataStoreSettingsRepository, SettingsKeys, SettingsMapper
-│   └── status/                  AccessibilityStatusRepository
+│   └── status/                  AccessibilityStatusRepository, AccessibilityStatusWatcher
 ├── presentation/
-│   ├── common/                  shared composables, UiText helpers
-│   ├── theme/
-│   ├── onboarding/              OnboardingRoute, OnboardingScreen, OnboardingViewModel, ...
-│   ├── home/                    HomeRoute, HomeScreen, HomeViewModel, ...
-│   ├── settings/                SettingsRoute, SettingsScreen, SettingsViewModel, ...
-│   └── panel/                   PanelContent (Compose), PanelViewModel, PanelUiState
+│   ├── common/                  ExpressiveComponents, NavigationItem, LabeledSwitchRow
+│   ├── theme/                   Color, Shape, Theme, Type
+│   ├── navigation/              DotapNavHost, Destinations, NavTransitions, ScreenViewModelFactories
+│   ├── onboarding/              OnboardingRoute, OnboardingScreen, OnboardingViewModel, IntroStep
+│   ├── home/                    HomeRoute, HomeScreen, HomeViewModel, HeroStatusCard, RestrictedSettingsDialog
+│   ├── settings/                SettingsRoute, SettingsScreen, SettingsViewModel
+│   ├── gestures/                GesturesRoute, GesturesScreen, GesturesViewModel, GestureActionsCard
+│   ├── appearance/              AppearanceRoute, AppearanceScreen, AppearanceViewModel, DimensionsCard, LiveDotPreviewCard
+│   ├── battery/                 BatteryGuidanceRoute, BatteryGuidanceScreen, BatteryGuidanceViewModel, BrandStepsCard, OemBrandExtensions
+│   └── panel/                   PanelContent (Compose), PanelRoute, PanelViewModel, PanelUiState
 ├── system/
 │   ├── service/                 DotapAccessibilityService, GlobalActionPerformer
-│   ├── overlay/                 OverlayController, DotView, DotPresenter, DotUiState,
-│   │                            PanelHost, OverlayLifecycleOwner
+│   ├── overlay/                 OverlayController, DotView, DotViewAnimations, DotPresenter, DotUiState,
+│   │                            PanelHost, OverlayLifecycleOwner, DragMetrics
 │   └── tile/                    DotapTileService
 └── util/                        tiny helpers with no better home
 ```
@@ -251,7 +255,7 @@ A `Service` has no `ViewModelStore`, so the overlay uses the **same contract** w
 
 - `DotUiState` (immutable): visible, side, y-ratio, size, alpha, hiddenForCapture.
 - `DotPresenter` (plain class, scoped to the service coroutine scope): owns `StateFlow<DotUiState>`, receives gesture callbacks from `GestureEngine`, calls `HandleGestureUseCase`, and updates position on drag. The service collects `SettingsRepository.settings` and calls `DotPresenter.applySettings`.
-- `DotView` (plain `View`): **renders** `DotUiState`, forwards raw touch events. No decisions.
+- `DotView` (plain `View`): **renders** `DotUiState`, forwards raw touch events. Uses `DotViewAnimations` to manage fluid idle breathing and panel-open/close morphing transitions with bounds padding to prevent edge clipping.
 - `OverlayController`: the `WindowManager` adapter. Adds/removes/updates the window, applies exclusion rects, implements `OverlayVisibility`, and reports settled positions through `onPositionSettled` so the service can persist them.
 
 The **panel** is Compose, so it can use a real `PanelViewModel`:
@@ -327,6 +331,11 @@ Implements `SettingsRepository` with DataStore Preferences. `SettingsMapper` con
 ### 8.2 Service status
 
 `AccessibilityStatusRepository` implements `ServiceStatusRepository`. The **system enabled-services list is the source of truth** (read-only: `AccessibilityManager.getEnabledAccessibilityServiceList` or the enabled-services secure setting), because the process can die while the service stays enabled. `ServiceConnectionTracker` (a `StateFlow<Boolean>` owned by `AppContainer`, set by the service) is a live hint that distinguishes `ENABLED_CONNECTED` from `ENABLED_NOT_CONNECTED`. There is **no global singleton state**.
+
+To ensure the in-app UI (such as `HeroStatusCard` on `HomeScreen`) reacts immediately when the user enables or disables the service in Android Settings, `AccessibilityStatusWatcher` observes:
+1. `ContentObserver` on `Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES` and `Settings.Secure.ACCESSIBILITY_ENABLED`.
+2. `AccessibilityManager.AccessibilityStateChangeListener` and `AccessibilityServicesStateChangeListener` (API 33+).
+3. `Application.ActivityLifecycleCallbacks` on `MainActivity.onActivityResumed` to guarantee an instant re-check whenever the app returns to the foreground.
 
 ## 9. Dependency injection
 

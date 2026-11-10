@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Top-left bracket -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 43,32.5 L 36,32.5 A 3.5,3.5 0 0,0 32.5,36 L 32.5,43.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.5" />
+
+    <!-- Top-right bracket -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 65,32.5 L 72,32.5 A 3.5,3.5 0 0,1 75.5,36 L 75.5,43.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.5" />
+
+    <!-- Bottom-left bracket -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 32.5,64.5 L 32.5,72 A 3.5,3.5 0 0,0 36,75.5 L 43,75.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.5" />
+
+    <!-- Bottom-right bracket -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 75.5,64.5 L 75.5,72 A 3.5,3.5 0 0,1 72,75.5 L 65,75.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="3.5" />
+
+    <!-- Outer circular ring -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M 54,38.5 A 15.5,15.5 0 1,0 54,69.5 A 15.5,15.5 0 1,0 54,38.5 Z"
+        android:strokeColor="#000000"
+        android:strokeWidth="4" />
+
+    <!-- Center dot -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M 54,45.5 A 8.5,8.5 0 1,0 54,62.5 A 8.5,8.5 0 1,0 54,45.5 Z" />
+</vector>

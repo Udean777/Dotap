@@ -89,4 +89,19 @@
     <string name="battery_steps_vivo">1. Open Settings > Battery > Background power consumption management.\n2. Find Dotap and select \"High background power consumption\" or \"Don\'t restrict\".\n3. Enable Autostart in Permissions management.</string>
     <string name="battery_steps_huawei">1. Open Settings > Battery > App launch.\n2. Turn OFF \"Manage automatically\" for Dotap.\n3. Turn ON \"Auto-launch\", \"Secondary launch\", and \"Run in background\".</string>
     <string name="battery_steps_other">1. Open Settings > Apps > Dotap > App battery usage.\n2. Select \"Unrestricted\" or disable battery optimization.\n3. Ensure background usage is permitted.</string>
+    <string name="status_enabled_desc">Dot overlay is active and ready above your screen.</string>
+    <string name="status_disabled_desc">Enable accessibility to show the floating dot and run shortcuts.</string>
+    <string name="status_not_connected_desc">Service is enabled in Android settings but disconnected. Toggle it off and on.</string>
+    <string name="dot_preview_label">Live Dot Preview</string>
+    <string name="dot_preview_desc">Visual preview of size and idle opacity</string>
+    <string name="home_section_customize">Customize Dotap</string>
+    <string name="home_section_controls">Controls</string>
+    <string name="appearance_preview_section">Live Preview</string>
+    <string name="appearance_behavior_section">Behavior</string>
+    <string name="appearance_dimensions_section">Size &amp; Opacity</string>
+    <string name="gestures_actions_section">Actions</string>
+    <string name="gestures_timing_section">Timing</string>
+    <string name="accessibility_icon_desc">Accessibility</string>
+    <string name="privacy_icon_desc">Privacy</string>
+    <string name="back_icon_desc">Navigate back</string>
 </resources>

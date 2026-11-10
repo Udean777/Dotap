@@ -4,31 +4,37 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
-import com.ssajudn.dotap.domain.model.Limits
+import com.ssajudn.dotap.domain.model.DotSettings
+import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
 import com.ssajudn.dotap.presentation.theme.DotapTheme
-import kotlin.math.roundToInt
+
+private const val DIVIDER_ALPHA = 0.5f
 
 @Composable
 fun AppearanceRoute(
@@ -39,7 +45,6 @@ fun AppearanceRoute(
     AppearanceScreen(state = state, onEvent = viewModel::onEvent, onBack = onBack)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceScreen(
     state: AppearanceUiState,
@@ -47,19 +52,37 @@ fun AppearanceScreen(
     onBack: () -> Unit,
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.appearance_title)) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(text = stringResource(R.string.back_button))
-                    }
-                },
-            )
-        },
+        topBar = { AppearanceTopAppBar(onBack = onBack) },
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
         AppearanceBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AppearanceTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.appearance_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
 }
 
 @Composable
@@ -73,86 +96,48 @@ private fun AppearanceBody(
             .fillMaxSize()
             .padding(innerPadding)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        LabeledSwitchRow(
-            label = stringResource(R.string.dot_visibility_label),
-            checked = state.settings.isDotEnabled,
-            onCheckedChange = { onEvent(AppearanceUiEvent.DotEnabledToggled(it)) },
+        LiveDotPreviewCard(
+            dotSizeDp = state.settings.dotSizeDp,
+            idleOpacityPercent = state.settings.idleOpacityPercent,
         )
-        LabeledSwitchRow(
-            label = stringResource(R.string.snap_to_edge_label),
-            checked = state.settings.isSnapToEdgeEnabled,
-            onCheckedChange = { onEvent(AppearanceUiEvent.SnapToEdgeToggled(it)) },
-        )
-        DotSizeSlider(
-            sizeDp = state.settings.dotSizeDp,
-            onChange = { onEvent(AppearanceUiEvent.DotSizeChanged(it)) },
-        )
-        IdleOpacitySlider(
-            opacityPercent = state.settings.idleOpacityPercent,
-            onChange = { onEvent(AppearanceUiEvent.IdleOpacityChanged(it)) },
-        )
+        ExpressiveSectionHeader(text = stringResource(R.string.appearance_behavior_section))
+        BehaviorCard(settings = state.settings, onEvent = onEvent)
+        ExpressiveSectionHeader(text = stringResource(R.string.appearance_dimensions_section))
+        DimensionsCard(settings = state.settings, onEvent = onEvent)
     }
 }
 
 @Composable
-private fun DotSizeSlider(
-    sizeDp: Int,
-    onChange: (Int) -> Unit,
+private fun BehaviorCard(
+    settings: DotSettings,
+    onEvent: (AppearanceUiEvent) -> Unit,
 ) {
-    val label = stringResource(R.string.dot_size_label)
-    val valueText = stringResource(R.string.dot_size_value, sizeDp)
-    Column {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        Text(text = valueText, style = MaterialTheme.typography.bodyMedium)
-        Slider(
-            modifier = Modifier.semantics {
-                contentDescription = label
-                stateDescription = valueText
-            },
-            value = sizeDp.toFloat(),
-            onValueChange = { onChange(it.roundToInt().roundToMultiple(DOT_SIZE_STEP_DP)) },
-            valueRange = Limits.MIN_DOT_SIZE_DP.toFloat()..Limits.MAX_DOT_SIZE_DP.toFloat(),
-            steps = DOT_SIZE_STEPS,
-        )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            LabeledSwitchRow(
+                label = stringResource(R.string.dot_visibility_label),
+                checked = settings.isDotEnabled,
+                onCheckedChange = { onEvent(AppearanceUiEvent.DotEnabledToggled(it)) },
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = DIVIDER_ALPHA),
+            )
+            LabeledSwitchRow(
+                label = stringResource(R.string.snap_to_edge_label),
+                checked = settings.isSnapToEdgeEnabled,
+                onCheckedChange = { onEvent(AppearanceUiEvent.SnapToEdgeToggled(it)) },
+            )
+        }
     }
 }
-
-@Composable
-private fun IdleOpacitySlider(
-    opacityPercent: Int,
-    onChange: (Int) -> Unit,
-) {
-    val label = stringResource(R.string.idle_opacity_label)
-    val valueText = stringResource(R.string.idle_opacity_value, opacityPercent)
-    Column {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge)
-        Text(text = valueText, style = MaterialTheme.typography.bodyMedium)
-        Slider(
-            modifier = Modifier.semantics {
-                contentDescription = label
-                stateDescription = valueText
-            },
-            value = opacityPercent.toFloat(),
-            onValueChange = { onChange(it.roundToInt().roundToMultiple(IDLE_OPACITY_STEP_PERCENT)) },
-            valueRange = Limits.MIN_IDLE_OPACITY_PERCENT.toFloat()..Limits.MAX_IDLE_OPACITY_PERCENT.toFloat(),
-            steps = IDLE_OPACITY_STEPS,
-        )
-    }
-}
-
-private fun Int.roundToMultiple(step: Int): Int = (this.toFloat() / step).roundToInt() * step
-
-private const val DOT_SIZE_STEP_DP = 2
-private const val IDLE_OPACITY_STEP_PERCENT = 5
-
-private const val DOT_SIZE_STEPS =
-    (Limits.MAX_DOT_SIZE_DP - Limits.MIN_DOT_SIZE_DP) / DOT_SIZE_STEP_DP - 1
-
-private const val IDLE_OPACITY_STEPS =
-    (Limits.MAX_IDLE_OPACITY_PERCENT - Limits.MIN_IDLE_OPACITY_PERCENT) / IDLE_OPACITY_STEP_PERCENT - 1
 
 @Preview(showBackground = true)
 @Composable

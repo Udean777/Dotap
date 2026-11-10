@@ -3,9 +3,6 @@ package com.ssajudn.dotap.data.status
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.ComponentName
 import android.content.Context
-import android.database.ContentObserver
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.accessibility.AccessibilityManager
@@ -21,27 +18,31 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class AccessibilityStatusRepository(
     private val context: Context,
     private val dispatcherProvider: DispatcherProvider,
-    serviceConnectionTracker: ServiceConnectionTracker,
+    private val serviceConnectionTracker: ServiceConnectionTracker,
 ) : AccessibilityStatusSource,
     ServiceStatusRepository {
 
     override val isServiceEnabled: Flow<Boolean> = callbackFlow {
-        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
-            override fun onChange(selfChange: Boolean) {
-                trySend(checkServiceEnabled())
-            }
+        val watcher = AccessibilityStatusWatcher(context) {
+            trySend(checkServiceEnabled())
         }
+        watcher.start()
 
-        val uri = Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
-        context.contentResolver.registerContentObserver(uri, false, observer)
+        val trackerJob = serviceConnectionTracker.isConnected.onEach {
+            trySend(checkServiceEnabled())
+        }.launchIn(this)
+
         trySend(checkServiceEnabled())
 
         awaitClose {
-            context.contentResolver.unregisterContentObserver(observer)
+            watcher.stop()
+            trackerJob.cancel()
         }
     }.distinctUntilChanged().flowOn(dispatcherProvider.io)
 
@@ -50,7 +51,9 @@ class AccessibilityStatusRepository(
         serviceConnectionTracker = serviceConnectionTracker,
     ).invoke()
 
-    private fun checkServiceEnabled(): Boolean = isEnabledInSecureSettings() || isEnabledInAccessibilityManager()
+    private fun checkServiceEnabled(): Boolean = serviceConnectionTracker.isConnected.value ||
+        isEnabledInSecureSettings() ||
+        isEnabledInAccessibilityManager()
 
     private fun isEnabledInSecureSettings(): Boolean {
         val enabledServices = Settings.Secure.getString(

@@ -57,7 +57,10 @@ internal fun createSnapAnimator(
         }
     }
     // Publish the new position only once settled, otherwise the state collector jumps the dot mid-animation.
-    animator.doOnEnd { onSettled() }
+    animator.doOnEnd {
+        metrics.view.animateDockSquashAndRebound()
+        onSettled()
+    }
     return animator
 }
 

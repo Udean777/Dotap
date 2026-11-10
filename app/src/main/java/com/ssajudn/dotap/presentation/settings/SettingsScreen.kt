@@ -1,33 +1,41 @@
 package com.ssajudn.dotap.presentation.settings
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
+import com.ssajudn.dotap.presentation.common.ExpressiveIconBadge
+import com.ssajudn.dotap.presentation.common.ExpressiveNavigationRow
+import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
+import com.ssajudn.dotap.presentation.common.NavigationItem
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
 @Composable
@@ -36,34 +44,49 @@ fun SettingsRoute(
     onEffect: (SettingsUiEffect) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     LaunchedEffect(viewModel) {
         viewModel.uiEffect.collect(onEffect)
     }
-
     SettingsScreen(state = state, onEvent = viewModel::onEvent)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     state: SettingsUiState,
     onEvent: (SettingsUiEvent) -> Unit,
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.settings_title)) },
-                navigationIcon = {
-                    TextButton(onClick = { onEvent(SettingsUiEvent.BackClicked) }) {
-                        Text(text = stringResource(R.string.back_button))
-                    }
-                },
-            )
-        },
+        topBar = { SettingsTopAppBar(onBack = { onEvent(SettingsUiEvent.BackClicked) }) },
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
         SettingsBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.settings_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
 }
 
 @Composable
@@ -76,91 +99,125 @@ private fun SettingsBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        FeedbackSection(
+        ExpressiveSectionHeader(text = stringResource(R.string.settings_feedback_section))
+        FeedbackCard(
             isHapticsEnabled = state.settings.isHapticsEnabled,
             onHapticsToggled = { onEvent(SettingsUiEvent.HapticsToggled(it)) },
         )
-        HorizontalDivider()
-        BehaviorSection(
+
+        ExpressiveSectionHeader(text = stringResource(R.string.settings_behavior_section))
+        BehaviorCard(
             onGesturesClicked = { onEvent(SettingsUiEvent.OpenGesturesClicked) },
             onAppearanceClicked = { onEvent(SettingsUiEvent.OpenAppearanceClicked) },
         )
-        HorizontalDivider()
-        TroubleshootingSection(
+
+        ExpressiveSectionHeader(text = stringResource(R.string.settings_troubleshooting_section))
+        TroubleshootingCard(
             onBatteryGuidanceClicked = { onEvent(SettingsUiEvent.OpenBatteryGuidanceClicked) },
         )
     }
 }
 
 @Composable
-private fun FeedbackSection(
+private fun FeedbackCard(
     isHapticsEnabled: Boolean,
     onHapticsToggled: (Boolean) -> Unit,
 ) {
-    SectionHeader(text = stringResource(R.string.settings_feedback_section))
-    LabeledSwitchRow(
-        label = stringResource(R.string.haptics_label),
-        checked = isHapticsEnabled,
-        onCheckedChange = onHapticsToggled,
-        modifier = Modifier.padding(horizontal = 16.dp),
-    )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            LabeledSwitchRow(
+                label = stringResource(R.string.haptics_label),
+                checked = isHapticsEnabled,
+                onCheckedChange = onHapticsToggled,
+                leadingIcon = {
+                    ExpressiveIconBadge(
+                        iconRes = R.drawable.ic_settings_haptics,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconTint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                },
+            )
+        }
+    }
 }
 
 @Composable
-private fun BehaviorSection(
+private fun BehaviorCard(
     onGesturesClicked: () -> Unit,
     onAppearanceClicked: () -> Unit,
 ) {
-    SectionHeader(text = stringResource(R.string.settings_behavior_section))
-    NavigationRow(
-        title = stringResource(R.string.gestures_title),
-        summary = stringResource(R.string.gestures_summary),
-        onClick = onGesturesClicked,
-    )
-    NavigationRow(
-        title = stringResource(R.string.appearance_title),
-        summary = stringResource(R.string.appearance_summary),
-        onClick = onAppearanceClicked,
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+    ) {
+        Column {
+            GesturesRow(onGesturesClicked)
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            )
+            AppearanceRow(onAppearanceClicked)
+        }
+    }
+}
+
+@Composable
+private fun GesturesRow(onClick: () -> Unit) {
+    ExpressiveNavigationRow(
+        item = NavigationItem(
+            title = stringResource(R.string.gestures_title),
+            summary = stringResource(R.string.gestures_summary),
+            iconRes = R.drawable.ic_settings_gestures,
+            onClick = onClick,
+        ),
     )
 }
 
 @Composable
-private fun TroubleshootingSection(
+private fun AppearanceRow(onClick: () -> Unit) {
+    ExpressiveNavigationRow(
+        item = NavigationItem(
+            title = stringResource(R.string.appearance_title),
+            summary = stringResource(R.string.appearance_summary),
+            iconRes = R.drawable.ic_settings_appearance,
+            onClick = onClick,
+        ),
+    )
+}
+
+@Composable
+private fun TroubleshootingCard(
     onBatteryGuidanceClicked: () -> Unit,
 ) {
-    SectionHeader(text = stringResource(R.string.settings_troubleshooting_section))
-    NavigationRow(
-        title = stringResource(R.string.battery_guidance_title),
-        summary = stringResource(R.string.battery_guidance_summary),
-        onClick = onBatteryGuidanceClicked,
-    )
-}
-
-@Composable
-private fun NavigationRow(
-    title: String,
-    summary: String,
-    onClick: () -> Unit,
-) {
-    ListItem(
-        headlineContent = { Text(text = title) },
-        supportingContent = { Text(text = summary) },
-        modifier = Modifier.clickable(role = Role.Button, onClick = onClick),
-    )
-}
-
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .semantics { heading() },
-    )
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+    ) {
+        ExpressiveNavigationRow(
+            item = NavigationItem(
+                title = stringResource(R.string.battery_guidance_title),
+                summary = stringResource(R.string.battery_guidance_summary),
+                iconRes = R.drawable.ic_settings_battery,
+                onClick = onBatteryGuidanceClicked,
+            ),
+        )
+    }
 }
 
 @Preview(showBackground = true)

@@ -9,21 +9,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,34 +40,49 @@ fun BatteryGuidanceRoute(
     onEffect: (BatteryGuidanceUiEffect) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     LaunchedEffect(viewModel) {
         viewModel.uiEffect.collect(onEffect)
     }
-
     BatteryGuidanceScreen(state = state, onEvent = viewModel::onEvent)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatteryGuidanceScreen(
     state: BatteryGuidanceUiState,
     onEvent: (BatteryGuidanceUiEvent) -> Unit,
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.battery_guidance_title)) },
-                navigationIcon = {
-                    TextButton(onClick = { onEvent(BatteryGuidanceUiEvent.BackClicked) }) {
-                        Text(text = stringResource(R.string.back_button))
-                    }
-                },
-            )
-        },
+        topBar = { BatteryTopAppBar(onBack = { onEvent(BatteryGuidanceUiEvent.BackClicked) }) },
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
         BatteryGuidanceBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BatteryTopAppBar(onBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.battery_guidance_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
 }
 
 @Composable
@@ -78,22 +95,20 @@ private fun BatteryGuidanceBody(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         Text(
             text = stringResource(R.string.battery_guidance_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-
         BrandSelectorChips(
             selectedBrand = state.selectedBrand,
             currentBrand = state.currentBrand,
             onSelectBrand = { onEvent(BatteryGuidanceUiEvent.SelectBrand(it)) },
         )
-
         BrandStepsCard(
             brand = state.selectedBrand,
             onOpenBatterySettings = { onEvent(BatteryGuidanceUiEvent.OpenBatterySettingsClicked) },
@@ -109,9 +124,7 @@ private fun BrandSelectorChips(
     onSelectBrand: (OemBrand) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OemBrand.entries.forEach { brand ->
@@ -120,75 +133,15 @@ private fun BrandSelectorChips(
             FilterChip(
                 selected = brand == selectedBrand,
                 onClick = { onSelectBrand(brand) },
+                shape = RoundedCornerShape(12.dp),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
                 label = { Text(text = stringResource(brand.labelResId()) + suffix) },
             )
         }
     }
-}
-
-@Composable
-private fun BrandStepsCard(
-    brand: OemBrand,
-    onOpenBatterySettings: () -> Unit,
-    onOpenWebHelp: () -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = stringResource(brand.labelResId()),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(brand.stepsResId()),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            CardActions(
-                onOpenBatterySettings = onOpenBatterySettings,
-                onOpenWebHelp = onOpenWebHelp,
-            )
-        }
-    }
-}
-
-@Composable
-private fun CardActions(
-    onOpenBatterySettings: () -> Unit,
-    onOpenWebHelp: () -> Unit,
-) {
-    Button(
-        onClick = onOpenBatterySettings,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(text = stringResource(R.string.battery_open_settings_button))
-    }
-    OutlinedButton(
-        onClick = onOpenWebHelp,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(text = stringResource(R.string.battery_view_online_guide))
-    }
-}
-
-private fun OemBrand.labelResId(): Int = when (this) {
-    OemBrand.XIAOMI -> R.string.oem_brand_xiaomi
-    OemBrand.SAMSUNG -> R.string.oem_brand_samsung
-    OemBrand.OPPO -> R.string.oem_brand_oppo
-    OemBrand.VIVO -> R.string.oem_brand_vivo
-    OemBrand.HUAWEI -> R.string.oem_brand_huawei
-    OemBrand.OTHER -> R.string.oem_brand_other
-}
-
-private fun OemBrand.stepsResId(): Int = when (this) {
-    OemBrand.XIAOMI -> R.string.battery_steps_xiaomi
-    OemBrand.SAMSUNG -> R.string.battery_steps_samsung
-    OemBrand.OPPO -> R.string.battery_steps_oppo
-    OemBrand.VIVO -> R.string.battery_steps_vivo
-    OemBrand.HUAWEI -> R.string.battery_steps_huawei
-    OemBrand.OTHER -> R.string.battery_steps_other
 }
 
 @Preview(showBackground = true)

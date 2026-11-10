@@ -1,5 +1,6 @@
 package com.ssajudn.dotap.system.overlay
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -25,21 +26,24 @@ class DotView(
 
     private val outerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.argb(160, 30, 30, 30)
+        color = Color.argb(OUTER_ALPHA, BG_DARK, BG_DARK, BG_DARK)
     }
 
     private val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        color = Color.argb(200, 255, 255, 255)
+        color = Color.argb(DEFAULT_RING_ALPHA, RGB_MAX, RGB_MAX, RGB_MAX)
         strokeWidth = dpToPx(OUTER_RING_STROKE_DP)
     }
 
     private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.argb(220, 255, 255, 255)
+        color = Color.argb(CENTER_ALPHA, RGB_MAX, RGB_MAX, RGB_MAX)
     }
 
     private val exclusionRects = mutableListOf<Rect>()
+    private var colorAnimator: ValueAnimator? = null
+    var isMenuOpen: Boolean = false
+        private set
 
     init {
         contentDescription = context.getString(R.string.dot_content_description)
@@ -49,21 +53,50 @@ class DotView(
     }
 
     fun render(state: DotUiState) {
-        animate().cancel()
         if (!state.isVisible || state.isHiddenForCapture) {
+            animate().cancel()
+            colorAnimator?.cancel()
             visibility = GONE
             alpha = 0f
+            scaleX = 1f
+            scaleY = 1f
             updateExclusionRects(false)
         } else {
             visibility = VISIBLE
-            if (state.alpha >= 1f || alpha == 0f) {
-                alpha = state.alpha
-            } else {
-                animate().alpha(state.alpha).setDuration(FADE_DURATION_MS).start()
-            }
+            updateAlphaAndScale(state.alpha)
             updateExclusionRects(true)
         }
         invalidate()
+    }
+
+    private fun updateAlphaAndScale(targetAlpha: Float) {
+        if (isMenuOpen) return
+        if (alpha == 0f) {
+            alpha = targetAlpha
+            scaleX = 1f
+            scaleY = 1f
+            return
+        }
+        if (targetAlpha < 1.0f) {
+            animateIdleFade(targetAlpha)
+        } else if (alpha < 1.0f) {
+            animateWakeupFade()
+        }
+    }
+
+    fun animateMenuState(isOpen: Boolean) {
+        if (isMenuOpen == isOpen) return
+        isMenuOpen = isOpen
+        animateMenuReaction(isOpen)
+        colorAnimator?.cancel()
+        colorAnimator = createRingColorAnimator(
+            onColorUpdate = { color ->
+                ringPaint.color = color
+                invalidate()
+            },
+            isOpen = isOpen,
+            currentColor = ringPaint.color,
+        ).apply { start() }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -71,6 +104,13 @@ class DotView(
         if (changed) {
             updateExclusionRects(visibility == VISIBLE)
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        animate().cancel()
+        colorAnimator?.cancel()
+        colorAnimator = null
     }
 
     private fun updateExclusionRects(enabled: Boolean) {
@@ -85,7 +125,9 @@ class DotView(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val radius = width.coerceAtMost(height) / 2f
+        val inset = dpToPx(DRAW_INSET_DP)
+        val availableSize = width.coerceAtMost(height) - (inset * 2)
+        val radius = (availableSize / 2f).coerceAtLeast(0f)
         val centerX = width / 2f
         val centerY = height / 2f
 
@@ -96,11 +138,18 @@ class DotView(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> animatePressState(isPressed = true, isMenuOpen = isMenuOpen)
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> animatePressState(
+                isPressed = false,
+                isMenuOpen = isMenuOpen,
+            )
+        }
         val handled = onTouchListener(this, event)
         return handled || super.onTouchEvent(event)
     }
 
-    // TalkBack activation must trigger the single-tap action, which raw touch handling alone never reaches.
     override fun performClick(): Boolean {
         super.performClick()
         actions.onClick()
@@ -113,11 +162,12 @@ class DotView(
         return true
     }
 
-    private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density
-
     companion object {
-        private const val FADE_DURATION_MS = 250L
+        private const val OUTER_ALPHA = 160
+        private const val BG_DARK = 30
+        private const val CENTER_ALPHA = 220
         private const val OUTER_RING_STROKE_DP = 1.5f
+        private const val DRAW_INSET_DP = 2.0f
         private const val RING_RATIO = 0.72f
         private const val CENTER_DOT_RATIO = 0.35f
     }

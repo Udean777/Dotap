@@ -95,8 +95,7 @@ class DotView(
         } else {
             visibility = VISIBLE
             updateAlphaAndScale(state.alpha)
-            val targetTx = if (isIdlePeeking) (if (isRightSide) 1f else -1f) * width * PEEK_OFFSET_RATIO else 0f
-            animate().translationX(targetTx).setDuration(PEEK_ANIM_DURATION_MS).start()
+            animatePeekTranslation(this, isIdlePeeking, isRightSide)
             updateExclusionRects(true)
         }
         invalidate()
@@ -232,4 +231,18 @@ private fun selectDotBitmap(
     style == DotStyle.APP_ICON -> bitmaps.second
     style == DotStyle.CUSTOM_IMAGE -> bitmaps.third
     else -> null
+}
+
+private const val PEEK_OFFSET_RATIO = 0.25f
+private const val PEEK_ANIM_DURATION_MS = 220L
+
+private fun animatePeekTranslation(
+    view: DotView,
+    isIdlePeeking: Boolean,
+    isRightSide: Boolean,
+) {
+    val targetTx = if (isIdlePeeking) (if (isRightSide) 1f else -1f) * view.width * PEEK_OFFSET_RATIO else 0f
+    if (view.translationX != targetTx) {
+        view.animate().translationX(targetTx).setDuration(PEEK_ANIM_DURATION_MS).start()
+    }
 }

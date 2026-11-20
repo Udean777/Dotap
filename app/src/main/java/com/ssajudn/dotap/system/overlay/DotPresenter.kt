@@ -51,8 +51,8 @@ class DotPresenter(
         isTouchActive = true
         idleJob?.cancel()
         idleJob = null
-        if (_uiState.value.alpha != FULL_ALPHA) {
-            _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA)
+        if (_uiState.value.alpha != FULL_ALPHA || _uiState.value.isIdle) {
+            _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA, isIdle = false)
         }
     }
 
@@ -85,6 +85,8 @@ class DotPresenter(
         _uiState.value = current.copy(
             isVisible = settings.isDotEnabled,
             dotSizeDp = settings.dotSizeDp.coerceIn(Limits.MIN_DOT_SIZE_DP, Limits.MAX_DOT_SIZE_DP),
+            dotStyle = settings.dotStyle,
+            customDotImagePath = settings.customDotImagePath,
             isRightSide = settings.isRightSide,
             yRatio = settings.yRatio.coerceIn(Limits.MIN_Y_RATIO, Limits.MAX_Y_RATIO),
             isSnapToEdgeEnabled = settings.isSnapToEdgeEnabled,
@@ -112,15 +114,15 @@ class DotPresenter(
     private fun restartIdleTimer() {
         idleJob?.cancel()
         if (targetIdleAlpha >= FULL_ALPHA) {
-            if (_uiState.value.alpha != FULL_ALPHA) {
-                _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA)
+            if (_uiState.value.alpha != FULL_ALPHA || _uiState.value.isIdle) {
+                _uiState.value = _uiState.value.copy(alpha = FULL_ALPHA, isIdle = false)
             }
             return
         }
         val coroutineScope = scope ?: return
         idleJob = coroutineScope.launch {
             delay(idleDelayMs)
-            _uiState.value = _uiState.value.copy(alpha = targetIdleAlpha)
+            _uiState.value = _uiState.value.copy(alpha = targetIdleAlpha, isIdle = true)
         }
     }
 

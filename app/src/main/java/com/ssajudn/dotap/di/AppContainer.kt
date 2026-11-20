@@ -4,20 +4,24 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.ssajudn.dotap.data.apps.PackageManagerInstalledAppsRepository
+import com.ssajudn.dotap.data.settings.AndroidCustomDotImageStorage
 import com.ssajudn.dotap.data.settings.DataStoreSettingsRepository
 import com.ssajudn.dotap.data.settings.settingsDataStore
 import com.ssajudn.dotap.data.status.AccessibilityStatusRepository
 import com.ssajudn.dotap.domain.port.DispatcherProvider
-import com.ssajudn.dotap.domain.repository.ServiceStatusRepository
+import com.ssajudn.dotap.domain.repository.InstalledAppsRepository
 import com.ssajudn.dotap.domain.repository.SettingsRepository
 import com.ssajudn.dotap.domain.status.ServiceConnectionTracker
 import com.ssajudn.dotap.domain.usecase.ObserveServiceStatusUseCase
 import com.ssajudn.dotap.presentation.appearance.AppearanceViewModel
 import com.ssajudn.dotap.presentation.battery.BatteryGuidanceViewModel
+import com.ssajudn.dotap.presentation.common.AppIconLoader
 import com.ssajudn.dotap.presentation.gestures.GesturesViewModel
 import com.ssajudn.dotap.presentation.home.HomeViewModel
 import com.ssajudn.dotap.presentation.navigation.ScreenViewModelFactories
 import com.ssajudn.dotap.presentation.onboarding.OnboardingViewModel
+import com.ssajudn.dotap.presentation.panelsettings.PanelSettingsViewModel
 import com.ssajudn.dotap.presentation.settings.SettingsViewModel
 
 /**
@@ -39,7 +43,15 @@ class AppContainer(
         DataStoreSettingsRepository(appContext.settingsDataStore, dispatcherProvider)
     }
 
-    val serviceStatusRepository: ServiceStatusRepository by lazy {
+    val installedAppsRepository: InstalledAppsRepository by lazy {
+        PackageManagerInstalledAppsRepository(appContext, dispatcherProvider)
+    }
+
+    val appIconLoader: AppIconLoader by lazy {
+        AppIconLoader(dispatcherProvider)
+    }
+
+    private val accessibilityStatusRepository: AccessibilityStatusRepository by lazy {
         AccessibilityStatusRepository(
             context = appContext,
             dispatcherProvider = dispatcherProvider,
@@ -49,7 +61,7 @@ class AppContainer(
 
     val observeServiceStatusUseCase: ObserveServiceStatusUseCase by lazy {
         ObserveServiceStatusUseCase(
-            accessibilityStatusSource = serviceStatusRepository as AccessibilityStatusRepository,
+            accessibilityStatusSource = accessibilityStatusRepository,
             serviceConnectionTracker = serviceConnectionTracker,
         )
     }
@@ -90,6 +102,7 @@ class AppContainer(
             initializer {
                 GesturesViewModel(
                     settingsRepository = settingsRepository,
+                    installedAppsRepository = installedAppsRepository,
                     dispatcherProvider = dispatcherProvider,
                 )
             }
@@ -100,6 +113,18 @@ class AppContainer(
             initializer {
                 AppearanceViewModel(
                     settingsRepository = settingsRepository,
+                    customDotImageStorage = AndroidCustomDotImageStorage(appContext, dispatcherProvider),
+                    dispatcherProvider = dispatcherProvider,
+                )
+            }
+        }
+
+    private val panelSettingsViewModelFactory: ViewModelProvider.Factory =
+        viewModelFactory {
+            initializer {
+                PanelSettingsViewModel(
+                    settingsRepository = settingsRepository,
+                    installedAppsRepository = installedAppsRepository,
                     dispatcherProvider = dispatcherProvider,
                 )
             }
@@ -121,6 +146,7 @@ class AppContainer(
         settings = settingsViewModelFactory,
         gestures = gesturesViewModelFactory,
         appearance = appearanceViewModelFactory,
+        panelSettings = panelSettingsViewModelFactory,
         batteryGuidance = batteryGuidanceViewModelFactory,
     )
 }

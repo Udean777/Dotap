@@ -66,20 +66,21 @@ com.ssajudn.dotap
 ├── di/
 │   └── AppContainer.kt          manual dependency wiring, ViewModel factories
 ├── domain/                      pure Kotlin
-│   ├── model/                   ActionType, GestureType, DotSettings, PanelSlot,
-│   │                            ServiceStatus, ActionResult, Defaults, Limits
+│   ├── model/                   ActionType, GestureType, DotSettings, PanelSlot, InstalledApp,
+│   │                            MessageType, ServiceStatus, ActionResult, Defaults, Limits
 │   ├── gesture/                 GestureEngine, GestureConfig, Scheduler
-│   ├── repository/              SettingsRepository, ServiceStatusRepository (interfaces)
-│   ├── port/                    ActionPerformer, OverlayVisibility, PanelLauncher,
-│   │                            HapticFeedback, DispatcherProvider (interfaces)
+│   ├── repository/              SettingsRepository, ServiceStatusRepository, InstalledAppsRepository (interfaces)
+│   ├── port/                    ActionPerformer, OverlayVisibility, PanelLauncher, FlashlightController,
+│   │                            AppLauncher, HapticFeedback, DispatcherProvider (interfaces)
 │   ├── status/                  ServiceConnectionTracker (live connection hint)
 │   └── usecase/                 HandleGestureUseCase, ExecuteActionUseCase,
 │                                TakeScreenshotUseCase, ObserveServiceStatusUseCase
 ├── data/
+│   ├── apps/                    PackageManagerInstalledAppsRepository
 │   ├── settings/                DataStoreSettingsRepository, SettingsKeys, SettingsMapper
 │   └── status/                  AccessibilityStatusRepository, AccessibilityStatusWatcher
 ├── presentation/
-│   ├── common/                  ExpressiveComponents, NavigationItem, LabeledSwitchRow
+│   ├── common/                  ExpressiveComponents, NavigationItem, LabeledSwitchRow, AppPickerBottomSheet, AppShortcutIcon
 │   ├── theme/                   Color, Shape, Theme, Type
 │   ├── navigation/              DotapNavHost, Destinations, NavTransitions, ScreenViewModelFactories
 │   ├── onboarding/              OnboardingRoute, OnboardingScreen, OnboardingViewModel, IntroStep
@@ -88,9 +89,11 @@ com.ssajudn.dotap
 │   ├── gestures/                GesturesRoute, GesturesScreen, GesturesViewModel, GestureActionsCard
 │   ├── appearance/              AppearanceRoute, AppearanceScreen, AppearanceViewModel, DimensionsCard, LiveDotPreviewCard
 │   ├── battery/                 BatteryGuidanceRoute, BatteryGuidanceScreen, BatteryGuidanceViewModel, BrandStepsCard, OemBrandExtensions
+│   ├── panelsettings/           PanelSettingsRoute, PanelSettingsScreen, PanelSettingsViewModel, PanelPreviewCard, PanelSlotsCards, AvailableActionsCard
 │   └── panel/                   PanelContent (Compose), PanelRoute, PanelViewModel, PanelUiState
 ├── system/
-│   ├── service/                 DotapAccessibilityService, GlobalActionPerformer
+│   ├── service/                 DotapAccessibilityService, GlobalActionPerformer,
+│   │                            AndroidFlashlightController, AndroidAppLauncher
 │   ├── overlay/                 OverlayController, DotView, DotViewAnimations, DotPresenter, DotUiState,
 │   │                            PanelHost, OverlayLifecycleOwner, DragMetrics
 │   └── tile/                    DotapTileService
@@ -186,9 +189,10 @@ Navigation Compose with a small `NavHost` (Onboarding, Home, Settings sub-screen
 
 ### 5.1 Models (immutable, validated)
 
-- `ActionType` (enum): `SCREENSHOT, HOME, BACK, RECENTS, NOTIFICATIONS, QUICK_SETTINGS, POWER_DIALOG, LOCK_SCREEN, OPEN_PANEL, NONE` (later `LAUNCH_APP`, `FLASHLIGHT`).
+- `ActionType` (enum): `SCREENSHOT, HOME, BACK, RECENTS, NOTIFICATIONS, QUICK_SETTINGS, POWER_DIALOG, LOCK_SCREEN, OPEN_PANEL, FLASHLIGHT, LAUNCH_APP, NONE`.
+- `PanelSlot`: `data class PanelSlot(val action: ActionType, val appPackage: String? = null)` so multiple `LAUNCH_APP` slots can target distinct apps.
 - `GestureType`: `SINGLE_TAP, DOUBLE_TAP, LONG_PRESS`.
-- `DotSettings`: all user settings; `copy`-based; `with...` methods clamp to `Limits`; `DotSettings.Default` built from `Defaults`.
+- `DotSettings`: all user settings (including per-gesture launch-app packages and `panelSlots`); `copy`-based; `with...` methods clamp to `Limits`; `DotSettings.Default` built from `Defaults`.
 - `ServiceStatus`: `DISABLED`, `ENABLED_CONNECTED`, `ENABLED_NOT_CONNECTED`.
 - `ActionResult`: sealed (`Success`, `Unavailable(reason)`, `Failed`).
 - `Defaults` and `Limits`: all numeric constants (sizes, timeouts, opacity bounds, hide/restore delays). **No magic numbers elsewhere.**
@@ -199,9 +203,12 @@ Navigation Compose with a small `NavHost` (Onboarding, Home, Settings sub-screen
 |---|---|---|
 | `SettingsRepository` | `val settings: Flow<DotSettings>`, `suspend fun update(transform)` | `data/settings` |
 | `ServiceStatusRepository` | `val status: Flow<ServiceStatus>` | `data/status` |
-| `ActionPerformer` | `fun perform(globalAction: GlobalAction): Boolean` | `system/service/GlobalActionPerformer` |
+| `InstalledAppsRepository` | `suspend fun getLaunchableApps(): List<InstalledApp>` | `data/apps` |
+| `ActionPerformer` | `fun perform(action: ActionType): Boolean` | `system/service/GlobalActionPerformer` |
 | `OverlayVisibility` | `hideForCapture()`, `restoreAfterCapture()`, `showMessage(MessageType)` | `system/overlay/OverlayController` |
 | `PanelLauncher` | `fun open()`, `fun close()` | `system/overlay/PanelHost` |
+| `FlashlightController` | `fun toggle(): Boolean` | `system/service/AndroidFlashlightController` |
+| `AppLauncher` | `fun launch(packageName: String): Boolean` | `system/service/AndroidAppLauncher` |
 | `HapticFeedback` | `fun tick()` | `system/overlay` |
 | `DispatcherProvider` | `main`, `io`, `default` | `di/` |
 
@@ -211,8 +218,8 @@ A use case exists only when it holds logic or combines sources. **No pass-throug
 
 | Use case | Responsibility |
 |---|---|
-| `HandleGestureUseCase` | Given a `GestureType`, read the current settings, find the assigned action, trigger haptics, run `ExecuteActionUseCase` |
-| `ExecuteActionUseCase` | Route an `ActionType` to the right behavior: global action, `TakeScreenshotUseCase`, `PanelLauncher`, no-op |
+| `HandleGestureUseCase` | Given a `GestureType`, read the current settings, find the assigned action and optional target app package, trigger haptics, run `ExecuteActionUseCase` |
+| `ExecuteActionUseCase` | Route an `ActionType` to the right behavior: global action, `TakeScreenshotUseCase`, `PanelLauncher`, `FlashlightController`, `AppLauncher`, no-op |
 | `TakeScreenshotUseCase` | Hide overlay, wait, perform screenshot, restore, report `ActionResult` (see 7) |
 | `ObserveServiceStatusUseCase` | Combine the system enabled-services list with the live connection tracker into `ServiceStatus` |
 
@@ -322,7 +329,10 @@ Implements `SettingsRepository` with DataStore Preferences. `SettingsMapper` con
 | `action_single` | ActionType name | HOME (OPEN_PANEL once the panel ships) |
 | `action_double` | ActionType name | SCREENSHOT |
 | `action_long` | ActionType name | NONE |
-| `panel_slots` | ordered list (comma string) | HOME,BACK,RECENTS,SCREENSHOT,NOTIFICATIONS,QUICK_SETTINGS |
+| `single_tap_app_package` | String (optional) | null |
+| `double_tap_app_package` | String (optional) | null |
+| `long_press_app_package` | String (optional) | null |
+| `panel_slots` | ordered list (comma string, `LAUNCH_APP:pkg` optional) | HOME,BACK,RECENTS,SCREENSHOT,NOTIFICATIONS,QUICK_SETTINGS |
 | `haptics_enabled` | Boolean | true |
 | `snap_to_edge` | Boolean | true |
 | `dot_side` | LEFT/RIGHT | RIGHT |
@@ -391,7 +401,8 @@ Notes:
 - Verify on real devices that the service stays connected with no event types. If an OEM disconnects it, add the narrowest possible event type, keep ignoring all events in code, and record it in `COMPLIANCE.md`.
 - `canTakeScreenshot="true"` is enabled for `GLOBAL_ACTION_TAKE_SCREENSHOT` (API 30+), disclosed in `COMPLIANCE.md`. `canPerformGestures="true"` is **not** in the MVP; add it only with human approval and a disclosure update.
 - Overlay window params (starting point): type `TYPE_ACCESSIBILITY_OVERLAY`, flags `FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_NO_LIMITS`, format `PixelFormat.TRANSLUCENT`, gravity `TOP | START`. Set `systemGestureExclusionRects` on the dot (API 29+).
-- No `INTERNET`, no `SYSTEM_ALERT_WINDOW`, no foreground service.
+- `<queries>` declares `ACTION_MAIN` + `CATEGORY_LAUNCHER` so the Launch App picker can query installed launcher apps without `QUERY_ALL_PACKAGES`.
+- No `INTERNET`, no `QUERY_ALL_PACKAGES`, no `SYSTEM_ALERT_WINDOW`, no foreground service.
 
 ## 12. Failure handling
 
@@ -451,4 +462,3 @@ Prefer **fakes over mocks**; no mocking library is needed. Target: all domain an
 
 - Own capture (`takeScreenshot`, API 30+): new `CaptureScreenshotUseCase` behind a feature flag; needs `canTakeScreenshot`, MediaStore saving, and a disclosure update.
 - Custom gestures: needs `canPerformGestures` and `dispatchGesture`; same disclosure caveat. Add a `GesturePerformer` port.
-- Launch-app and flashlight actions: extend `ActionType` and `ExecuteActionUseCase`, with new ports if they touch Android APIs.

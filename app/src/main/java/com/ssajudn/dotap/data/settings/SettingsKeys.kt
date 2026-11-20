@@ -15,12 +15,21 @@ internal object SettingsKeys {
     val ACTION_SINGLE = stringPreferencesKey("action_single")
     val ACTION_DOUBLE = stringPreferencesKey("action_double")
     val ACTION_LONG = stringPreferencesKey("action_long")
+    val ACTION_SWIPE_UP = stringPreferencesKey("action_swipe_up")
+    val ACTION_SWIPE_DOWN = stringPreferencesKey("action_swipe_down")
+    val ACTION_SWIPE_LEFT = stringPreferencesKey("action_swipe_left")
+    val ACTION_SWIPE_RIGHT = stringPreferencesKey("action_swipe_right")
+    val SINGLE_TAP_APP = stringPreferencesKey("single_tap_app")
+    val DOUBLE_TAP_APP = stringPreferencesKey("double_tap_app")
+    val LONG_PRESS_APP = stringPreferencesKey("long_press_app")
     val PANEL_SLOTS = stringPreferencesKey("panel_slots")
     val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
     val SNAP_TO_EDGE = booleanPreferencesKey("snap_to_edge")
     val DOT_SIDE = stringPreferencesKey("dot_side")
     val DOT_Y_RATIO = floatPreferencesKey("dot_y_ratio")
     val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+    val DOT_STYLE = stringPreferencesKey("dot_style")
+    val CUSTOM_DOT_IMAGE_PATH = stringPreferencesKey("custom_dot_image_path")
 }
 
 internal const val SIDE_RIGHT = "RIGHT"

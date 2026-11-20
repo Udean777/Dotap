@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,11 +36,15 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ActionType
+import com.ssajudn.dotap.domain.model.PanelSlot
+import com.ssajudn.dotap.presentation.common.AppShortcutIcon
 import com.ssajudn.dotap.presentation.common.labelRes
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 import kotlinx.coroutines.delay
@@ -51,6 +56,9 @@ private const val PANEL_FADE_DURATION_MS = 180
 private const val PANEL_EXIT_DURATION_MS = 160L
 private const val TONAL_ELEVATION_DP = 6
 private const val SHADOW_ELEVATION_DP = 8
+private const val LAUNCH_APP_ICON_SIZE_DP = 24
+private const val CELL_ICON_SIZE_DP = 28
+private const val CELL_BG_ALPHA = 0.7f
 
 @Composable
 fun PanelRoute(
@@ -109,7 +117,7 @@ fun PanelScreen(
                 tonalElevation = TONAL_ELEVATION_DP.dp,
                 shadowElevation = SHADOW_ELEVATION_DP.dp,
             ) {
-                PanelGrid(slots = state.slots, onEvent = onEvent)
+                PanelGrid(state = state, onEvent = onEvent)
             }
         }
     }
@@ -117,10 +125,10 @@ fun PanelScreen(
 
 @Composable
 private fun PanelGrid(
-    slots: List<ActionType>,
+    state: PanelUiState,
     onEvent: (PanelUiEvent) -> Unit,
 ) {
-    val grid = resolveGridSlots(slots)
+    val grid = resolveGridSlots(state.slots)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -129,33 +137,40 @@ private fun PanelGrid(
     ) {
         for (rowIndex in 0 until PanelDimensions.GRID_COLUMNS) {
             PanelRow(
-                rowIndex = rowIndex,
-                rowSlots = grid[rowIndex],
+                rowState = PanelRowState(
+                    rowSlots = grid[rowIndex],
+                    isCenterRow = rowIndex == 1,
+                    appLabels = state.appLabels,
+                ),
                 onEvent = onEvent,
             )
         }
     }
 }
 
+private data class PanelRowState(
+    val rowSlots: List<PanelSlot?>,
+    val isCenterRow: Boolean,
+    val appLabels: Map<String, String>,
+)
+
 @Composable
 private fun PanelRow(
-    rowIndex: Int,
-    rowSlots: List<ActionType?>,
+    rowState: PanelRowState,
     onEvent: (PanelUiEvent) -> Unit,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(PanelDimensions.CELL_SPACING_DP.dp),
-    ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(PanelDimensions.CELL_SPACING_DP.dp)) {
         for (colIndex in 0 until PanelDimensions.GRID_COLUMNS) {
-            val isCenter = rowIndex == 1 && colIndex == 1
+            val isCenter = rowState.isCenterRow && colIndex == 1
             if (isCenter) {
                 PanelCloseCell(onClick = { onEvent(PanelUiEvent.CloseClicked) })
             } else {
-                val action = rowSlots[colIndex]
-                if (action != null) {
+                val slot = rowState.rowSlots[colIndex]
+                if (slot != null) {
                     PanelActionCell(
-                        action = action,
-                        onClick = { onEvent(PanelUiEvent.SlotSelected(action)) },
+                        slot = slot,
+                        appLabel = slot.appPackage?.let { rowState.appLabels[it] },
+                        onClick = { onEvent(PanelUiEvent.SlotSelected(slot)) },
                     )
                 } else {
                     Spacer(modifier = Modifier.size(PanelDimensions.CELL_SIZE_DP.dp))
@@ -167,30 +182,67 @@ private fun PanelRow(
 
 @Composable
 private fun PanelActionCell(
-    action: ActionType,
+    slot: PanelSlot,
+    appLabel: String?,
     onClick: () -> Unit,
 ) {
-    val iconRes = action.iconRes() ?: return
-    val label = stringResource(action.labelRes())
+    val iconRes = slot.action.iconRes() ?: return
+    val contentLabel = appLabel ?: stringResource(slot.action.labelRes())
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-        modifier = Modifier
-            .size(PanelDimensions.CELL_SIZE_DP.dp)
-            .semantics { role = Role.Button },
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = CELL_BG_ALPHA),
+        modifier = Modifier.size(PanelDimensions.CELL_SIZE_DP.dp).semantics { role = Role.Button },
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
         ) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = label,
-                modifier = Modifier.size(CELL_ICON_SIZE_DP.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            if (slot.action == ActionType.LAUNCH_APP) {
+                LaunchAppCellContent(slot.appPackage, appLabel, contentLabel)
+            } else {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = contentLabel,
+                    modifier = Modifier.size(CELL_ICON_SIZE_DP.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LaunchAppCellContent(
+    appPackage: String?,
+    appLabel: String?,
+    contentLabel: String,
+) {
+    if (appLabel != null) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            AppShortcutIcon(
+                packageName = appPackage,
+                contentDescription = appLabel,
+                modifier = Modifier.size(LAUNCH_APP_ICON_SIZE_DP.dp),
+            )
+            Text(
+                text = appLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
         }
+    } else {
+        AppShortcutIcon(
+            packageName = appPackage,
+            contentDescription = contentLabel,
+            modifier = Modifier.size(CELL_ICON_SIZE_DP.dp),
+        )
     }
 }
 
@@ -220,46 +272,6 @@ private fun PanelCloseCell(
         }
     }
 }
-
-internal fun resolveGridSlots(slots: List<ActionType>): List<List<ActionType?>> {
-    val positions = SLOT_POSITIONS_MAP[slots.size] ?: OUTER_POSITIONS
-    val grid = MutableList(PanelDimensions.GRID_COLUMNS) {
-        MutableList<ActionType?>(PanelDimensions.GRID_COLUMNS) { null }
-    }
-    slots.take(positions.size).forEachIndexed { index, action ->
-        val (row, col) = positions[index]
-        grid[row][col] = action
-    }
-    return grid
-}
-
-private val OUTER_POSITIONS = listOf(
-    0 to 0,
-    0 to 1,
-    0 to 2,
-    1 to 0,
-    1 to 2,
-    2 to 0,
-    2 to 1,
-    2 to 2,
-)
-
-private val SLOT_POSITIONS_MAP = mapOf(
-    SLOT_COUNT_THREE to listOf(0 to 1, 1 to 0, 1 to 2),
-    SLOT_COUNT_FOUR to listOf(0 to 1, 1 to 0, 1 to 2, 2 to 1),
-    SLOT_COUNT_FIVE to listOf(0 to 0, 0 to 1, 0 to 2, 1 to 0, 1 to 2),
-    SLOT_COUNT_SIX to listOf(0 to 0, 0 to 1, 0 to 2, 1 to 0, 1 to 2, 2 to 1),
-    SLOT_COUNT_SEVEN to listOf(0 to 0, 0 to 1, 0 to 2, 1 to 0, 1 to 2, 2 to 0, 2 to 2),
-    SLOT_COUNT_EIGHT to OUTER_POSITIONS,
-)
-
-private const val CELL_ICON_SIZE_DP = 28
-private const val SLOT_COUNT_THREE = 3
-private const val SLOT_COUNT_FOUR = 4
-private const val SLOT_COUNT_FIVE = 5
-private const val SLOT_COUNT_SIX = 6
-private const val SLOT_COUNT_SEVEN = 7
-private const val SLOT_COUNT_EIGHT = 8
 
 @Preview(showBackground = true)
 @Composable

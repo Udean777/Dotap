@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ServiceStatus
+import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.common.ExpressiveIconBadge
 
 private const val CONTAINER_ALPHA = 0.5f
@@ -54,14 +55,31 @@ fun HeroStatusCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            StatusHeader(serviceStatus = serviceStatus)
-            StatusDescription(serviceStatus = serviceStatus)
+            StatusHeroRow(serviceStatus = serviceStatus)
             AnimatedActionButtons(
                 visible = !isConnected,
                 onEnableClicked = onEnableClicked,
                 onRestrictedHelpClicked = onRestrictedHelpClicked,
             )
         }
+    }
+}
+
+@Composable
+private fun StatusHeroRow(serviceStatus: ServiceStatus) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            StatusHeader(serviceStatus = serviceStatus)
+            StatusDescription(serviceStatus = serviceStatus)
+        }
+        DotapMascot(modifier = Modifier.size(72.dp))
     }
 }
 
@@ -128,11 +146,6 @@ private fun resolveStatusDisplay(status: ServiceStatus): StatusDisplay = when (s
 
 @Composable
 private fun StatusHeader(serviceStatus: ServiceStatus) {
-    StatusHeaderContent(serviceStatus = serviceStatus)
-}
-
-@Composable
-private fun StatusHeaderContent(serviceStatus: ServiceStatus) {
     val info = resolveStatusDisplay(serviceStatus)
     val badgeColor = if (info.isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
     val tintColor = if (info.isConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onError

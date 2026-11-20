@@ -23,6 +23,7 @@ import com.ssajudn.dotap.presentation.panel.PanelDimensions
 class PanelHost(
     private val context: Context,
     private val anchorProvider: () -> View?,
+    private val onOpenAppSearch: () -> Unit = {},
     private val content: @Composable (onClose: () -> Unit) -> Unit,
 ) : PanelLauncher {
 
@@ -30,6 +31,11 @@ class PanelHost(
         context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
     private var shownPanel: ShownPanel? = null
+
+    override fun openAppSearch() {
+        close()
+        onOpenAppSearch()
+    }
 
     override fun open() {
         if (shownPanel != null) return

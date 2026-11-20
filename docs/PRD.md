@@ -119,7 +119,7 @@ Note: screenshots need Android 11+ (API 30) and the `canTakeScreenshot` service 
 |---|---|---|
 | FR-30 | Tapping the dot (when single tap = Open panel) opens a rounded panel of 3–8 icons near the dot, AssistiveTouch-style (3×3 grid with the centre cell as Close). Tap outside or Back dismisses it. | P1 |
 | FR-31 | Default slots: Home, Back, Recents, Screenshot, Notifications, Quick Settings. | P1 |
-| FR-32 | User can reorder, add, and remove slots (3–8). | P2 |
+| FR-32 | User can reorder, add, and remove slots (3–8), including multiple Launch App slots with distinct target apps. | P2 |
 | FR-33 | Selecting a slot runs its action and closes the panel. Screenshot from the panel hides the panel and dot first. | P1 |
 
 ### 7.5 Onboarding and settings
@@ -163,8 +163,8 @@ Design direction: minimal Material 3, dark/light, dot is a soft translucent circ
 
 ## 10. Permissions and privacy
 
-- Declared: `BIND_ACCESSIBILITY_SERVICE` (on the service). Dot uses `TYPE_ACCESSIBILITY_OVERLAY`, so **no** `SYSTEM_ALERT_WINDOW` is needed.
-- Not requested: `INTERNET`, storage, location, contacts, microphone, camera (flashlight in v1.0 needs no permission).
+- Declared: `BIND_ACCESSIBILITY_SERVICE` (on the service) and `<queries>` for `ACTION_MAIN` + `CATEGORY_LAUNCHER` (package visibility for the Launch App picker without requesting `QUERY_ALL_PACKAGES`). Dot uses `TYPE_ACCESSIBILITY_OVERLAY`, so **no** `SYSTEM_ALERT_WINDOW` is needed.
+- Not requested: `INTERNET`, `QUERY_ALL_PACKAGES`, storage, location, contacts, microphone, camera (flashlight in v1.0 needs no permission).
 - Data: Dotap collects, stores, and transmits no personal data. Settings stay on the device.
 - Data Safety form: "No data collected, no data shared".
 

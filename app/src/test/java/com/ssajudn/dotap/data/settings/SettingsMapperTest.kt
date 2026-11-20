@@ -5,6 +5,7 @@ import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.model.Defaults
 import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.Limits
+import com.ssajudn.dotap.domain.model.PanelSlot
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -53,11 +54,15 @@ class SettingsMapperTest {
     @Test
     fun `panel slots are parsed when the size is valid`() {
         val preferences = mutablePreferencesOf(
-            SettingsKeys.PANEL_SLOTS to "HOME,BACK,RECENTS",
+            SettingsKeys.PANEL_SLOTS to "HOME,BACK,LAUNCH_APP:com.whatsapp",
         )
 
         assertEquals(
-            listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS),
+            listOf(
+                PanelSlot(ActionType.HOME),
+                PanelSlot(ActionType.BACK),
+                PanelSlot(ActionType.LAUNCH_APP, "com.whatsapp"),
+            ),
             mapper.toDomain(preferences).panelSlots,
         )
     }
@@ -69,7 +74,7 @@ class SettingsMapperTest {
         )
 
         assertEquals(
-            listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS),
+            listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS).map(::PanelSlot),
             mapper.toDomain(preferences).panelSlots,
         )
     }
@@ -101,10 +106,17 @@ class SettingsMapperTest {
             idleDelayMs = 1_500L,
             doubleTapTimeoutMs = 450L,
             longPressDurationMs = 900L,
-            singleTapAction = ActionType.BACK,
+            singleTapAction = ActionType.LAUNCH_APP,
             doubleTapAction = ActionType.RECENTS,
-            longPressAction = ActionType.NOTIFICATIONS,
-            panelSlots = listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS),
+            longPressAction = ActionType.LAUNCH_APP,
+            singleTapAppPackage = "com.android.camera2",
+            doubleTapAppPackage = null,
+            longPressAppPackage = "com.whatsapp",
+            panelSlots = listOf(
+                PanelSlot(ActionType.HOME),
+                PanelSlot(ActionType.LAUNCH_APP, "com.android.camera2"),
+                PanelSlot(ActionType.LAUNCH_APP, "com.whatsapp"),
+            ),
             isHapticsEnabled = false,
             isSnapToEdgeEnabled = false,
             isRightSide = false,

@@ -8,5 +8,6 @@ data class ScreenViewModelFactories(
     val settings: ViewModelProvider.Factory,
     val gestures: ViewModelProvider.Factory,
     val appearance: ViewModelProvider.Factory,
+    val panelSettings: ViewModelProvider.Factory,
     val batteryGuidance: ViewModelProvider.Factory,
 )

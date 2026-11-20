@@ -123,7 +123,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Prepare Signing Keystore
+      - name: Validate and decode signing keystore
         id: keystore
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
@@ -131,37 +131,21 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          test -n "$SIGNING_KEYSTORE_BASE64" || { echo "Missing SIGNING_KEYSTORE_BASE64 secret"; exit 1; }
+          test -n "$KEYSTORE_PASSWORD" || { echo "Missing KEYSTORE_PASSWORD secret"; exit 1; }
+          test -n "$KEY_ALIAS" || { echo "Missing KEY_ALIAS secret"; exit 1; }
+          test -n "$KEY_PASSWORD" || { echo "Missing KEY_PASSWORD secret"; exit 1; }
+
           mkdir -p keystores
           KEYSTORE_PATH="${{ github.workspace }}/keystores/dotap-release.keystore"
+          printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          test -s "$KEYSTORE_PATH"
+          keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null
 
-          if [ -n "$SIGNING_KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
-            echo "Using production signing credentials from repository secrets."
-            printf '%s' "$SIGNING_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
-            keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null
-
-            echo "keystore_file=$KEYSTORE_PATH" >> "$GITHUB_OUTPUT"
-            echo "keystore_password=$KEYSTORE_PASSWORD" >> "$GITHUB_OUTPUT"
-            echo "key_alias=$KEY_ALIAS" >> "$GITHUB_OUTPUT"
-            echo "key_password=$KEY_PASSWORD" >> "$GITHUB_OUTPUT"
-            echo "is_ci_generated=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::SIGNING_KEYSTORE_BASE64 or passwords not configured in secrets. Generating self-signed release keystore for CI artifact..."
-            keytool -genkeypair -v \
-              -keystore "$KEYSTORE_PATH" \
-              -alias dotap \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -storepass android \
-              -keypass android \
-              -dname "CN=Dotap CI, O=Dotap, C=US"
-
-            echo "keystore_file=$KEYSTORE_PATH" >> "$GITHUB_OUTPUT"
-            echo "keystore_password=android" >> "$GITHUB_OUTPUT"
-            echo "key_alias=dotap" >> "$GITHUB_OUTPUT"
-            echo "key_password=android" >> "$GITHUB_OUTPUT"
-            echo "is_ci_generated=true" >> "$GITHUB_OUTPUT"
-          fi
+          echo "keystore_file=$KEYSTORE_PATH" >> "$GITHUB_OUTPUT"
+          echo "keystore_password=$KEYSTORE_PASSWORD" >> "$GITHUB_OUTPUT"
+          echo "key_alias=$KEY_ALIAS" >> "$GITHUB_OUTPUT"
+          echo "key_password=$KEY_PASSWORD" >> "$GITHUB_OUTPUT"
 
       - name: Run Quality Verification
         run: ./gradlew spotlessCheck detekt testDebugUnitTest lintDebug --no-daemon
@@ -207,10 +191,38 @@ jobs:
           fi
 
           echo "Verifying AAB JAR signature..."
-          jarsigner -verify -certs "$AAB" >/dev/null
+          JARSIGNER_LOG="$RUNNER_TEMP/jarsigner-verify.log"
+          if jarsigner -verify -certs "$AAB" >"$JARSIGNER_LOG" 2>&1; then
+            if grep -q "internal inconsistencies" "$JARSIGNER_LOG"; then
+              echo "jarsigner reported its informational JarFile/JarInputStream consistency warning for the AAB."
+            fi
+            echo "AAB JAR signature verification passed."
+          else
+            verify_exit=$?
+            echo "AAB JAR signature verification failed with exit code $verify_exit."
+            tail -n 40 "$JARSIGNER_LOG"
+            exit "$verify_exit"
+          fi
 
           echo "Verifying APK signature..."
           "$APKSIGNER" verify --verbose "$APK"
+
+          echo "Comparing release certificate fingerprints..."
+          EXPECTED_CERT=$(keytool -list -v -keystore "$KEYSTORE_FILE" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" | awk -F': ' '/SHA256:/{gsub(":", "", $2); print toupper($2); exit}')
+          AAB_CERT=$(keytool -printcert -jarfile "$AAB" | awk -F': ' '/SHA256:/{gsub(":", "", $2); print toupper($2); exit}')
+          APK_CERT=$("$APKSIGNER" verify --print-certs "$APK" | awk '/certificate SHA-256 digest:/{gsub(":", "", $NF); print toupper($NF); exit}')
+
+          if [ -z "$EXPECTED_CERT" ] || [ -z "$AAB_CERT" ] || [ -z "$APK_CERT" ]; then
+            echo "A signing certificate fingerprint is missing (keystore/AAB/APK)."
+            exit 1
+          fi
+          echo "Configured keystore SHA-256: $EXPECTED_CERT"
+          echo "AAB signing certificate SHA-256: $AAB_CERT"
+          echo "APK signing certificate SHA-256: $APK_CERT"
+          if [ "$EXPECTED_CERT" != "$AAB_CERT" ] || [ "$EXPECTED_CERT" != "$APK_CERT" ]; then
+            echo "Release artifact signing certificate does not match the configured keystore."
+            exit 1
+          fi
 
           echo "Checking APK alignment..."
           "$ZIPALIGN" -c -P 16 -v 4 "$APK"
@@ -252,5 +264,5 @@ jobs:
             - **`Dotap-latest.apk`**: Always links to the latest version APK
             - **`SHA256SUMS.txt`**: Cryptographic verification checksums
 
-            > ${{ steps.keystore.outputs.is_ci_generated == 'true' && '⚠️ *Note: Built with CI-generated self-signed key. Set `SIGNING_KEYSTORE_BASE64` and keystore secrets in repo settings for production Play Store keys.*' || '✅ *Verified release artifact signed with official repository release key.*' }}
+            Verified release artifact signed with the configured repository release key.
           files: dist/*

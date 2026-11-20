@@ -31,14 +31,14 @@ android {
 
     signingConfigs {
         create("release") {
-            if (releaseStoreFile != null && releaseStoreFile.exists()) {
-                storeFile = releaseStoreFile
-                storePassword = releaseStorePassword
-                keyAlias = releaseKeyAlias
-                keyPassword = releaseKeyPassword
-                enableV1Signing = true
-                enableV2Signing = true
-            }
+            storeFile = releaseStoreFile
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
         }
     }
 
@@ -54,12 +54,9 @@ android {
 
     buildTypes {
         release {
-            if (releaseStoreFile != null && releaseStoreFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig = signingConfigs.getByName("release")
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -73,6 +70,50 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+val validateReleaseInputs =
+    tasks.register("validateReleaseInputs") {
+        group = "verification"
+        description = "Checks required signing and version inputs before creating a release artifact."
+        val configuredReleaseStoreFile = releaseStoreFile
+        val configuredReleaseStorePassword = releaseStorePassword
+        val configuredReleaseKeyAlias = releaseKeyAlias
+        val configuredReleaseKeyPassword = releaseKeyPassword
+        val configuredReleaseVersionCode = releaseVersionCodeInput
+        val configuredReleaseVersionName = releaseVersionNameInput
+
+        doLast {
+            val missing =
+                buildList {
+                    if (configuredReleaseStoreFile == null || !configuredReleaseStoreFile.isFile) {
+                        add("KEYSTORE_FILE / storeFile")
+                    }
+                    if (configuredReleaseStorePassword.isNullOrBlank()) add("KEYSTORE_PASSWORD / storePassword")
+                    if (configuredReleaseKeyAlias.isNullOrBlank()) add("KEY_ALIAS / keyAlias")
+                    if (configuredReleaseKeyPassword.isNullOrBlank()) add("KEY_PASSWORD / keyPassword")
+                }
+            check(missing.isEmpty()) {
+                "Release build refused. Set valid values for: ${missing.joinToString()}."
+            }
+            if (configuredReleaseVersionCode != null) {
+                check(configuredReleaseVersionCode.toIntOrNull()?.let { it > 0 } == true) {
+                    "VERSION_CODE must be a positive integer."
+                }
+            }
+            if (configuredReleaseVersionName != null) {
+                val semverRegex = Regex("\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?")
+                check(configuredReleaseVersionName.matches(semverRegex)) {
+                    "VERSION_NAME must use semantic version format, for example 1.2.3 or 1.2.3-beta.1."
+                }
+            }
+        }
+    }
+
+tasks.configureEach {
+    if (name == "bundleRelease" || name == "assembleRelease") {
+        dependsOn(validateReleaseInputs)
     }
 }
 

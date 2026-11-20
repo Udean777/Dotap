@@ -9,6 +9,8 @@ import com.ssajudn.dotap.domain.port.ActionPerformer
 import com.ssajudn.dotap.domain.port.HapticFeedback
 import com.ssajudn.dotap.domain.port.OverlayVisibility
 import com.ssajudn.dotap.domain.repository.SettingsRepository
+import com.ssajudn.dotap.testutil.FakeAppLauncher
+import com.ssajudn.dotap.testutil.FakeFlashlightController
 import com.ssajudn.dotap.testutil.FakePanelLauncher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +25,7 @@ class HandleGestureUseCaseTest {
     private lateinit var settingsRepository: FakeSettingsRepository
     private lateinit var hapticFeedback: RecordingHapticFeedback
     private lateinit var actionPerformer: RecordingActionPerformer
+    private lateinit var appLauncher: FakeAppLauncher
     private lateinit var executeActionUseCase: ExecuteActionUseCase
     private lateinit var useCase: HandleGestureUseCase
     private val callOrder = mutableListOf<String>()
@@ -40,20 +43,26 @@ class HandleGestureUseCaseTest {
         )
         hapticFeedback = RecordingHapticFeedback(callOrder)
         actionPerformer = RecordingActionPerformer(callOrder)
+        appLauncher = FakeAppLauncher()
+        executeActionUseCase = createExecuteUseCase()
+        useCase = HandleGestureUseCase(settingsRepository, hapticFeedback, executeActionUseCase)
+    }
 
+    private fun createExecuteUseCase(): ExecuteActionUseCase {
         val overlayVisibility = object : OverlayVisibility {
             override fun hideForCapture() = Unit
             override fun restoreAfterCapture() = Unit
             override fun showMessage(message: MessageType) = Unit
         }
-        val screenshotUseCase = TakeScreenshotUseCase(
-            overlayVisibility = overlayVisibility,
+        val screenshotUseCase = TakeScreenshotUseCase(overlayVisibility, actionPerformer, 0L, 0L)
+        return ExecuteActionUseCase(
             actionPerformer = actionPerformer,
-            hideDelayMs = 0L,
-            restoreDelayMs = 0L,
+            takeScreenshotUseCase = screenshotUseCase,
+            panelLauncher = FakePanelLauncher(),
+            flashlightController = FakeFlashlightController(),
+            appLauncher = appLauncher,
+            overlayVisibility = overlayVisibility,
         )
-        executeActionUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase, FakePanelLauncher())
-        useCase = HandleGestureUseCase(settingsRepository, hapticFeedback, executeActionUseCase)
     }
 
     @Test
@@ -104,6 +113,23 @@ class HandleGestureUseCaseTest {
         assertTrue(result is ActionResult.Success)
         assertEquals(0, hapticFeedback.tickCount)
         assertEquals(emptyList<ActionType>(), actionPerformer.performedActions)
+    }
+
+    @Test
+    fun `launch app gesture launches its own configured package`() = runTest {
+        settingsRepository.update {
+            it.copy(
+                singleTapAction = ActionType.LAUNCH_APP,
+                doubleTapAction = ActionType.LAUNCH_APP,
+                singleTapAppPackage = "com.whatsapp",
+                doubleTapAppPackage = "com.android.camera2",
+            )
+        }
+
+        useCase(GestureType.SINGLE_TAP)
+        useCase(GestureType.DOUBLE_TAP)
+
+        assertEquals(listOf("com.whatsapp", "com.android.camera2"), appLauncher.launchedPackages)
     }
 
     private class FakeSettingsRepository(

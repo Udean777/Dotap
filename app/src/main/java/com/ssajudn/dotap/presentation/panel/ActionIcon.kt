@@ -17,4 +17,7 @@ private val ICONS: Map<ActionType, Int> = mapOf(
     ActionType.QUICK_SETTINGS to R.drawable.ic_panel_quick_settings,
     ActionType.POWER_DIALOG to R.drawable.ic_panel_power,
     ActionType.LOCK_SCREEN to R.drawable.ic_panel_lock,
+    ActionType.FLASHLIGHT to R.drawable.ic_panel_flashlight,
+    ActionType.LAUNCH_APP to R.drawable.ic_panel_launch_app,
+    ActionType.SEARCH_APPS to R.drawable.ic_panel_launch_app,
 )

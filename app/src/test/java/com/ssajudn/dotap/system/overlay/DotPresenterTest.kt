@@ -14,6 +14,8 @@ import com.ssajudn.dotap.domain.repository.SettingsRepository
 import com.ssajudn.dotap.domain.usecase.ExecuteActionUseCase
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
 import com.ssajudn.dotap.domain.usecase.TakeScreenshotUseCase
+import com.ssajudn.dotap.testutil.FakeAppLauncher
+import com.ssajudn.dotap.testutil.FakeFlashlightController
 import com.ssajudn.dotap.testutil.FakePanelLauncher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +51,7 @@ class DotPresenterTest {
     fun setVisible_updatesState() = runTest {
         val presenter = DotPresenter()
         presenter.uiState.test {
-            awaitItem() // initial
+            awaitItem()
             presenter.setVisible(false)
             assertFalse(awaitItem().isVisible)
             presenter.setVisible(true)
@@ -62,7 +64,7 @@ class DotPresenterTest {
     fun setHiddenForCapture_updatesState() = runTest {
         val presenter = DotPresenter()
         presenter.uiState.test {
-            awaitItem() // initial
+            awaitItem()
             presenter.setHiddenForCapture(true)
             assertTrue(awaitItem().isHiddenForCapture)
             presenter.setHiddenForCapture(false)
@@ -75,20 +77,18 @@ class DotPresenterTest {
     fun updatePosition_clampsYRatio() = runTest {
         val presenter = DotPresenter()
         presenter.uiState.test {
-            awaitItem() // initial
+            awaitItem()
 
             presenter.updatePosition(isRightSide = false, yRatio = 0.5f)
             val state1 = awaitItem()
             assertFalse(state1.isRightSide)
             assertEquals(0.5f, state1.yRatio, 0.001f)
 
-            // Below min
             presenter.updatePosition(isRightSide = true, yRatio = -1.0f)
             val state2 = awaitItem()
             assertTrue(state2.isRightSide)
             assertEquals(Limits.MIN_Y_RATIO, state2.yRatio, 0.001f)
 
-            // Above max
             presenter.updatePosition(isRightSide = true, yRatio = 2.0f)
             val state3 = awaitItem()
             assertEquals(Limits.MAX_Y_RATIO, state3.yRatio, 0.001f)
@@ -101,7 +101,7 @@ class DotPresenterTest {
     fun updateAlpha_clampsWithinZeroAndOne() = runTest {
         val presenter = DotPresenter()
         presenter.uiState.test {
-            awaitItem() // initial
+            awaitItem()
 
             presenter.updateAlpha(0.6f)
             assertEquals(0.6f, awaitItem().alpha, 0.001f)
@@ -120,7 +120,7 @@ class DotPresenterTest {
     fun updateDotSize_clampsWithinLimits() = runTest {
         val presenter = DotPresenter()
         presenter.uiState.test {
-            awaitItem() // initial
+            awaitItem()
 
             presenter.updateDotSize(60)
             assertEquals(60, awaitItem().dotSizeDp)
@@ -185,6 +185,9 @@ class DotPresenterTest {
                 performer,
                 TakeScreenshotUseCase(NoopOverlayVisibility, performer, hideDelayMs = 150L, restoreDelayMs = 800L),
                 FakePanelLauncher(),
+                FakeFlashlightController(),
+                FakeAppLauncher(),
+                NoopOverlayVisibility,
             ),
         )
         val presenter = DotPresenter(handleGestureUseCase = useCase, scope = this)

@@ -40,10 +40,15 @@
     <string name="action_quick_settings">Pengaturan Cepat</string>
     <string name="action_power_dialog">Menu Daya</string>
     <string name="action_lock_screen">Kunci Layar</string>
+    <string name="action_flashlight">Senter</string>
+    <string name="action_launch_app">Buka Aplikasi</string>
     <string name="action_open_panel">Buka Panel</string>
     <string name="action_none">Tidak Ada</string>
 
     <string name="screenshot_unavailable">Tangkapan layar tidak tersedia di perangkat ini</string>
+    <string name="flashlight_unavailable">Senter tidak tersedia di perangkat ini</string>
+    <string name="app_not_configured">Belum ada aplikasi yang dipilih untuk pintasan ini</string>
+    <string name="app_launch_failed">Tidak dapat membuka aplikasi yang dipilih</string>
 
     <string name="panel_close">Tutup</string>
 
@@ -76,7 +81,7 @@
     <string name="battery_guidance_intro">Beberapa produsen perangkat menutup aplikasi overlay di latar belakang untuk hemat daya. Ikuti langkah untuk perangkat Anda agar Dotap tetap aktif.</string>
     <string name="battery_open_settings_button">Buka Pengaturan Baterai</string>
     <string name="battery_view_online_guide">Panduan Online (dontkillmyapp.com)</string>
-    <string name="battery_detected_badge">Perangkat Anda</string>
+    <string name="battery_brand_current_chip">%1$s • Perangkat Anda</string>
     <string name="oem_brand_xiaomi">Xiaomi / Redmi / POCO</string>
     <string name="oem_brand_samsung">Samsung</string>
     <string name="oem_brand_oppo">OPPO / Realme / OnePlus</string>
@@ -104,4 +109,28 @@
     <string name="accessibility_icon_desc">Aksesibilitas</string>
     <string name="privacy_icon_desc">Privasi</string>
     <string name="back_icon_desc">Kembali</string>
+
+    <string name="panel_settings_title">Panel Aksi Cepat</string>
+    <string name="panel_settings_summary">Atur urutan, tambah, dan hapus pintasan panel</string>
+    <string name="panel_settings_reset">Reset</string>
+    <string name="panel_preview_title">Pratinjau Langsung</string>
+    <string name="panel_slot_count">%1$d / %2$d slot</string>
+    <string name="panel_active_slots_section">Slot Aktif</string>
+    <string name="panel_active_slots_hint">Atur 3 hingga 8 aksi yang tampil di panel cepat</string>
+    <string name="panel_available_actions_section">Aksi Tersedia</string>
+    <string name="panel_all_actions_added">Semua aksi yang tersedia sudah ada di panel.</string>
+    <string name="panel_max_slots_reached">Maksimal %1$d slot tercapai. Hapus satu aksi untuk menambah lainnya.</string>
+    <string name="panel_min_slots_hint">Minimal %1$d slot diperlukan.</string>
+    <string name="panel_move_up_desc">Geser %1$s ke atas</string>
+    <string name="panel_move_down_desc">Geser %1$s ke bawah</string>
+    <string name="panel_remove_slot_desc">Hapus %1$s</string>
+    <string name="panel_add_slot_desc">Tambah %1$s</string>
+    <string name="panel_change_app_desc">Ubah aplikasi target untuk %1$s</string>
+    <string name="panel_app_not_selected">Ketuk untuk pilih aplikasi</string>
+    <string name="gesture_target_app_label">Aplikasi target: %1$s</string>
+    <string name="gesture_target_app_empty">Aplikasi target: Ketuk untuk memilih</string>
+    <string name="app_picker_title">Pilih Aplikasi</string>
+    <string name="app_picker_search_hint">Cari aplikasi</string>
+    <string name="app_picker_empty">Tidak ada aplikasi yang cocok</string>
+    <string name="mascot_cd_dotap">Maskot kucing Dotap</string>
 </resources>

@@ -55,14 +55,11 @@ class OnboardingViewModelTest {
     @Test
     fun `settings effect is emitted only after explicit consent AgreeClicked`() = runTest {
         viewModel.uiEffect.test {
-            // User on intro screen - cannot reach settings
             expectNoEvents()
 
-            // User moves to disclosure screen - still cannot reach settings
             viewModel.onEvent(OnboardingUiEvent.GetStartedClicked)
             expectNoEvents()
 
-            // User gives explicit affirmative consent
             viewModel.onEvent(OnboardingUiEvent.AgreeClicked)
 
             assertTrue(repository.current.isOnboardingCompleted)

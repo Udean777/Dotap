@@ -4,37 +4,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.DotSettings
+import com.ssajudn.dotap.presentation.common.DotapCard
+import com.ssajudn.dotap.presentation.common.DotapDivider
+import com.ssajudn.dotap.presentation.common.DotapTopAppBar
 import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
 import com.ssajudn.dotap.presentation.theme.DotapTheme
-
-private const val DIVIDER_ALPHA = 0.5f
 
 @Composable
 fun AppearanceRoute(
@@ -52,37 +41,16 @@ fun AppearanceScreen(
     onBack: () -> Unit,
 ) {
     Scaffold(
-        topBar = { AppearanceTopAppBar(onBack = onBack) },
+        topBar = {
+            DotapTopAppBar(
+                title = stringResource(R.string.appearance_title),
+                onBack = onBack,
+            )
+        },
         containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
         AppearanceBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AppearanceTopAppBar(onBack: () -> Unit) {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.appearance_title),
-                style = MaterialTheme.typography.titleLarge,
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_arrow_back),
-                    contentDescription = stringResource(R.string.back_button),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-    )
 }
 
 @Composable
@@ -115,21 +83,14 @@ private fun BehaviorCard(
     settings: DotSettings,
     onEvent: (AppearanceUiEvent) -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
+    DotapCard {
         Column(modifier = Modifier.padding(16.dp)) {
             LabeledSwitchRow(
                 label = stringResource(R.string.dot_visibility_label),
                 checked = settings.isDotEnabled,
                 onCheckedChange = { onEvent(AppearanceUiEvent.DotEnabledToggled(it)) },
             )
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = DIVIDER_ALPHA),
-            )
+            DotapDivider(modifier = Modifier.padding(vertical = 8.dp))
             LabeledSwitchRow(
                 label = stringResource(R.string.snap_to_edge_label),
                 checked = settings.isSnapToEdgeEnabled,

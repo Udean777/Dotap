@@ -14,6 +14,6 @@ class ActionTypeTest {
 
     @Test
     fun `default panel slots are all valid slots`() {
-        assertTrue(Defaults.DEFAULT_PANEL_SLOTS.all { it.canBePanelSlot })
+        assertTrue(Defaults.DEFAULT_PANEL_SLOTS.all { it.action.canBePanelSlot })
     }
 }

@@ -19,7 +19,7 @@ object Defaults {
     val ACTION_DOUBLE_TAP: ActionType = ActionType.SCREENSHOT
     val ACTION_LONG_PRESS: ActionType = ActionType.NONE
 
-    val DEFAULT_PANEL_SLOTS: List<ActionType> =
+    val DEFAULT_PANEL_SLOTS: List<PanelSlot> =
         listOf(
             ActionType.HOME,
             ActionType.BACK,
@@ -27,5 +27,5 @@ object Defaults {
             ActionType.SCREENSHOT,
             ActionType.NOTIFICATIONS,
             ActionType.QUICK_SETTINGS,
-        )
+        ).map(::PanelSlot)
 }

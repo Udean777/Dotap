@@ -50,6 +50,15 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `open panel settings emits navigation effect`() = runTest {
+        viewModel.uiEffect.test {
+            viewModel.onEvent(SettingsUiEvent.OpenPanelSettingsClicked)
+            assertEquals(SettingsUiEffect.NavigateToPanelSettings, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `open battery guidance emits navigation effect`() = runTest {
         viewModel.uiEffect.test {
             viewModel.onEvent(SettingsUiEvent.OpenBatteryGuidanceClicked)

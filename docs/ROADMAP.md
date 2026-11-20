@@ -71,3 +71,14 @@ Each task is sized for one focused agent session. Do tasks in order unless the h
 - [x] **M6.3** TalkBack, dynamic color, large font/display sizes audit.
 - [x] **M6.4** R8 keep rules check; release build size and memory audit (< 5 MB APK, < 30 MB runtime heap).
 - [x] **M6.5** Pre-launch checklist: translation completeness, licensing, reproducible release build.
+
+## M7 — v1.0 feature extensions and release signing (FR-32)
+
+- [x] **M7.1** Release APK signing & hygiene hardening: enable V1–V4 signing schemes, 4096-bit release keystore, `validateReleaseInputs` Gradle guard, R8 `android.util.Log` removal, and SHA-256 fingerprint verification in `release.yml`.
+  *Accept:* `./gradlew assembleRelease` produces a cleanly signed V1–V4 APK matching keystore fingerprint without ephemeral CI certificates.
+- [x] **M7.2** Quick-Action Panel Slots Editor (FR-32): `PanelSettingsViewModel`, Compose editor with live 3×3 preview, add/remove/reorder (3–8 slots), and reset to defaults.
+  *Accept:* unit tests pass for slot bounds and ViewModel events; panel reflects custom slot order live.
+- [x] **M7.3** Flashlight Toggle action (`ActionType.FLASHLIGHT`): `FlashlightController` port + `AndroidFlashlightController` using `CameraManager.setTorchMode` + `TorchCallback` with zero runtime permissions.
+  *Accept:* toggling works from gestures and panel slots; unavailable flash hardware shows a clean overlay message.
+- [x] **M7.4** Launch App Shortcut (`ActionType.LAUNCH_APP`): `<queries>` launcher visibility (no `QUERY_ALL_PACKAGES`), `InstalledAppsRepository` + `AppLauncher`, searchable `AppPickerBottomSheet`, and independent target app selection per gesture and per panel slot.
+  *Accept:* unit tests pass for per-gesture and per-slot app resolution, DataStore round-trip, and launch failure handling.

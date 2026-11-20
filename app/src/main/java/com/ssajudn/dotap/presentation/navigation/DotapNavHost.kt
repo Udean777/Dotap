@@ -20,6 +20,9 @@ import com.ssajudn.dotap.presentation.home.HomeUiEffect
 import com.ssajudn.dotap.presentation.home.HomeViewModel
 import com.ssajudn.dotap.presentation.onboarding.OnboardingRoute
 import com.ssajudn.dotap.presentation.onboarding.OnboardingViewModel
+import com.ssajudn.dotap.presentation.panelsettings.PanelSettingsRoute
+import com.ssajudn.dotap.presentation.panelsettings.PanelSettingsUiEffect
+import com.ssajudn.dotap.presentation.panelsettings.PanelSettingsViewModel
 import com.ssajudn.dotap.presentation.settings.SettingsRoute
 import com.ssajudn.dotap.presentation.settings.SettingsUiEffect
 import com.ssajudn.dotap.presentation.settings.SettingsViewModel
@@ -44,6 +47,7 @@ fun DotapNavHost(
         settingsDestination(navController, factories.settings)
         gesturesDestination(navController, factories.gestures)
         appearanceDestination(navController, factories.appearance)
+        panelSettingsDestination(navController, factories.panelSettings)
         batteryGuidanceDestination(navController, factories.batteryGuidance, systemActions)
     }
 }
@@ -98,6 +102,8 @@ private fun NavGraphBuilder.settingsDestination(
 
                     SettingsUiEffect.NavigateToAppearance -> navController.navigate(Destinations.APPEARANCE)
 
+                    SettingsUiEffect.NavigateToPanelSettings -> navController.navigate(Destinations.PANEL_SETTINGS)
+
                     SettingsUiEffect.NavigateToBatteryGuidance -> navController.navigate(
                         Destinations.BATTERY_GUIDANCE,
                     )
@@ -129,6 +135,22 @@ private fun NavGraphBuilder.appearanceDestination(
         AppearanceRoute(
             viewModel = viewModel<AppearanceViewModel>(factory = factory),
             onBack = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.panelSettingsDestination(
+    navController: NavHostController,
+    factory: ViewModelProvider.Factory,
+) {
+    composable(Destinations.PANEL_SETTINGS) {
+        PanelSettingsRoute(
+            viewModel = viewModel<PanelSettingsViewModel>(factory = factory),
+            onEffect = { effect ->
+                when (effect) {
+                    PanelSettingsUiEffect.NavigateBack -> navController.popBackStack()
+                }
+            },
         )
     }
 }

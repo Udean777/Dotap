@@ -96,4 +96,70 @@ class DotSettingsTest {
         val valid = settings.withYRatio(0.5f)
         assertEquals(0.5f, valid.yRatio, 0.001f)
     }
+
+    @Test
+    fun withPanelSlots_acceptsValidList() {
+        val slots = listOf(ActionType.BACK, ActionType.HOME, ActionType.LOCK_SCREEN).map(::PanelSlot)
+        val updated = DotSettings.Default.withPanelSlots(slots)
+        assertEquals(slots, updated.panelSlots)
+    }
+
+    @Test
+    fun withPanelSlots_filtersNonPanelActionsAndDuplicates() {
+        val slots = listOf(
+            ActionType.HOME,
+            ActionType.OPEN_PANEL,
+            ActionType.HOME,
+            ActionType.NONE,
+            ActionType.BACK,
+            ActionType.RECENTS,
+        ).map(::PanelSlot)
+        val updated = DotSettings.Default.withPanelSlots(slots)
+        assertEquals(
+            listOf(ActionType.HOME, ActionType.BACK, ActionType.RECENTS).map(::PanelSlot),
+            updated.panelSlots,
+        )
+    }
+
+    @Test
+    fun withPanelSlots_allowsMultipleDistinctLaunchAppSlots() {
+        val slots = listOf(
+            PanelSlot(ActionType.LAUNCH_APP, "com.example.camera"),
+            PanelSlot(ActionType.LAUNCH_APP, "com.example.chat"),
+            PanelSlot(ActionType.LAUNCH_APP, "com.example.camera"),
+            PanelSlot(ActionType.HOME, "ignored.package"),
+        )
+        val updated = DotSettings.Default.withPanelSlots(slots)
+        assertEquals(
+            listOf(
+                PanelSlot(ActionType.LAUNCH_APP, "com.example.camera"),
+                PanelSlot(ActionType.LAUNCH_APP, "com.example.chat"),
+                PanelSlot(ActionType.HOME, null),
+            ),
+            updated.panelSlots,
+        )
+    }
+
+    @Test
+    fun withPanelSlots_clampsAtMaxSlotsAndIgnoresBelowMinSlots() {
+        val allPanelActions = ActionType.entries.filter { it.canBePanelSlot }.map(::PanelSlot)
+        val tooMany = allPanelActions + allPanelActions
+        val capped = DotSettings.Default.withPanelSlots(tooMany)
+        assertEquals(Limits.MAX_PANEL_SLOTS, capped.panelSlots.size)
+
+        val tooFew = DotSettings.Default.withPanelSlots(listOf(PanelSlot(ActionType.HOME), PanelSlot(ActionType.BACK)))
+        assertEquals(Defaults.DEFAULT_PANEL_SLOTS, tooFew.panelSlots)
+    }
+
+    @Test
+    fun withGestureApp_updatesEachGestureIndependently() {
+        val updated = DotSettings.Default
+            .withGestureApp(GestureType.SINGLE_TAP, "com.a")
+            .withGestureApp(GestureType.DOUBLE_TAP, " com.b ")
+            .withGestureApp(GestureType.LONG_PRESS, "   ")
+
+        assertEquals("com.a", updated.appPackageFor(GestureType.SINGLE_TAP))
+        assertEquals("com.b", updated.appPackageFor(GestureType.DOUBLE_TAP))
+        assertEquals(null, updated.appPackageFor(GestureType.LONG_PRESS))
+    }
 }

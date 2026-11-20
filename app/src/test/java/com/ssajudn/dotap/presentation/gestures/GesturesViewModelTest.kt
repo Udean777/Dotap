@@ -1,25 +1,30 @@
 package com.ssajudn.dotap.presentation.gestures
 
 import com.ssajudn.dotap.domain.model.ActionType
+import com.ssajudn.dotap.domain.model.GestureType
 import com.ssajudn.dotap.domain.model.Limits
+import com.ssajudn.dotap.testutil.FakeInstalledAppsRepository
 import com.ssajudn.dotap.testutil.FakeSettingsRepository
 import com.ssajudn.dotap.testutil.TestDispatcherProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GesturesViewModelTest {
     private lateinit var repository: FakeSettingsRepository
+    private lateinit var appsRepository: FakeInstalledAppsRepository
     private lateinit var viewModel: GesturesViewModel
 
     @Before
     fun setUp() {
         repository = FakeSettingsRepository()
-        viewModel = GesturesViewModel(repository, TestDispatcherProvider())
+        appsRepository = FakeInstalledAppsRepository()
+        viewModel = GesturesViewModel(repository, appsRepository, TestDispatcherProvider())
     }
 
     @Test
@@ -32,6 +37,24 @@ class GesturesViewModelTest {
         assertEquals(ActionType.BACK, settings.singleTapAction)
         assertEquals(ActionType.RECENTS, settings.doubleTapAction)
         assertEquals(ActionType.NOTIFICATIONS, settings.longPressAction)
+    }
+
+    @Test
+    fun `selecting launch app opens picker when target app is unset and stores different apps per gesture`() = runTest {
+        viewModel.onEvent(GesturesUiEvent.SingleTapActionSelected(ActionType.LAUNCH_APP))
+        val singlePicker = viewModel.uiState.first { it.activeAppPickerGesture == GestureType.SINGLE_TAP }
+        assertEquals(GestureType.SINGLE_TAP, singlePicker.activeAppPickerGesture)
+
+        viewModel.onEvent(GesturesUiEvent.AppSelected(GestureType.SINGLE_TAP, "com.whatsapp"))
+        assertNull(viewModel.uiState.first { it.activeAppPickerGesture == null }.activeAppPickerGesture)
+
+        viewModel.onEvent(GesturesUiEvent.LongPressActionSelected(ActionType.LAUNCH_APP))
+        viewModel.uiState.first { it.activeAppPickerGesture == GestureType.LONG_PRESS }
+        viewModel.onEvent(GesturesUiEvent.AppSelected(GestureType.LONG_PRESS, "com.android.camera2"))
+
+        assertEquals("com.whatsapp", repository.current.singleTapAppPackage)
+        assertEquals("com.android.camera2", repository.current.longPressAppPackage)
+        assertNull(repository.current.doubleTapAppPackage)
     }
 
     @Test

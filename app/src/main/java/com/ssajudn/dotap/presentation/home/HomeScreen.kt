@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ServiceStatus
+import com.ssajudn.dotap.presentation.common.DotapCard
 import com.ssajudn.dotap.presentation.common.ExpressiveIconBadge
 import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
@@ -122,13 +123,7 @@ private fun ControlsCard(
     isDotEnabled: Boolean,
     onToggle: (Boolean) -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
-    ) {
+    DotapCard {
         Box(modifier = Modifier.padding(16.dp)) {
             LabeledSwitchRow(
                 label = stringResource(R.string.dot_visibility_label),

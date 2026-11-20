@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.view.ViewConfiguration
 import android.view.accessibility.AccessibilityEvent
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -20,6 +21,7 @@ import com.ssajudn.dotap.domain.port.OverlayVisibility
 import com.ssajudn.dotap.domain.usecase.ExecuteActionUseCase
 import com.ssajudn.dotap.domain.usecase.HandleGestureUseCase
 import com.ssajudn.dotap.domain.usecase.TakeScreenshotUseCase
+import com.ssajudn.dotap.presentation.common.LocalAppIconLoader
 import com.ssajudn.dotap.presentation.panel.PanelRoute
 import com.ssajudn.dotap.presentation.panel.PanelViewModel
 import com.ssajudn.dotap.system.overlay.AndroidHapticFeedback
@@ -40,6 +42,7 @@ class DotapAccessibilityService : AccessibilityService() {
     private var overlayController: OverlayController? = null
     private var presenter: DotPresenter? = null
     private var panelHost: PanelHost? = null
+    private var flashlightController: AndroidFlashlightController? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -85,9 +88,7 @@ class DotapAccessibilityService : AccessibilityService() {
         // Intentionally empty: Dotap does not observe or inspect window content/events.
     }
 
-    override fun onInterrupt() {
-        // No-op
-    }
+    override fun onInterrupt() = Unit
 
     override fun onUnbind(intent: Intent?): Boolean {
         cleanup()
@@ -103,18 +104,14 @@ class DotapAccessibilityService : AccessibilityService() {
         app: DotapApp,
         scope: CoroutineScope,
     ): Pair<DotPresenter, OverlayController> {
-        val actionPerformer = GlobalActionPerformer(this)
         var controllerRef: OverlayController? = null
         var executeUseCaseRef: ExecuteActionUseCase? = null
 
         val host = buildPanelHost(scope) { executeUseCaseRef }
         panelHost = host
-
-        val screenshotUseCase = TakeScreenshotUseCase(
-            overlayVisibility = overlayVisibilityBridge({ controllerRef }, { panelHost }),
-            actionPerformer = actionPerformer,
-        )
-        val executeUseCase = ExecuteActionUseCase(actionPerformer, screenshotUseCase, host)
+        val overlayVisibility = overlayVisibilityBridge({ controllerRef }, { panelHost })
+        val (executeUseCase, flashlight) = buildExecuteActionUseCase(this, overlayVisibility, host)
+        flashlightController = flashlight
         executeUseCaseRef = executeUseCase
 
         val haptic = AndroidHapticFeedback { controllerRef?.view }
@@ -134,6 +131,7 @@ class DotapAccessibilityService : AccessibilityService() {
             initializer {
                 PanelViewModel(
                     settingsRepository = app.container.settingsRepository,
+                    installedAppsRepository = app.container.installedAppsRepository,
                     executeAction = checkNotNull(executeActionProvider()) { "executeAction not initialized" },
                     actionScope = scope,
                     dispatcherProvider = app.container.dispatcherProvider,
@@ -143,7 +141,11 @@ class DotapAccessibilityService : AccessibilityService() {
         return PanelHost(
             context = this,
             anchorProvider = { overlayController?.view },
-            content = { onClose -> PanelRoute(onClose = onClose, viewModel = viewModel(factory = factory)) },
+            content = { onClose ->
+                CompositionLocalProvider(LocalAppIconLoader provides app.container.appIconLoader) {
+                    PanelRoute(onClose = onClose, viewModel = viewModel(factory = factory))
+                }
+            },
         )
     }
 
@@ -166,6 +168,8 @@ class DotapAccessibilityService : AccessibilityService() {
     private fun cleanup() {
         val app = applicationContext as? DotapApp
         app?.container?.serviceConnectionTracker?.setConnected(false)
+        flashlightController?.release()
+        flashlightController = null
         panelHost?.close()
         panelHost = null
         overlayController?.hide()
@@ -193,6 +197,28 @@ private fun overlayVisibilityBridge(
     override fun showMessage(message: MessageType) {
         controller()?.showMessage(message)
     }
+}
+
+private fun buildExecuteActionUseCase(
+    service: DotapAccessibilityService,
+    overlayVisibility: OverlayVisibility,
+    panelHost: PanelHost,
+): Pair<ExecuteActionUseCase, AndroidFlashlightController> {
+    val actionPerformer = GlobalActionPerformer(service)
+    val screenshotUseCase = TakeScreenshotUseCase(
+        overlayVisibility = overlayVisibility,
+        actionPerformer = actionPerformer,
+    )
+    val flashlight = AndroidFlashlightController(service)
+    val executeUseCase = ExecuteActionUseCase(
+        actionPerformer = actionPerformer,
+        takeScreenshotUseCase = screenshotUseCase,
+        panelLauncher = panelHost,
+        flashlightController = flashlight,
+        appLauncher = AndroidAppLauncher(service),
+        overlayVisibility = overlayVisibility,
+    )
+    return executeUseCase to flashlight
 }
 
 private fun updateEngineConfig(

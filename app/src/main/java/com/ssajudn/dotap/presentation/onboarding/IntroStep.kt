@@ -25,9 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ssajudn.dotap.R
+import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.theme.DotapTheme
-
-private const val HERO_OUTER_ALPHA = 0.4f
 
 @Composable
 internal fun IntroBody(
@@ -43,8 +42,8 @@ internal fun IntroBody(
         verticalArrangement = Arrangement.Center,
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        TactileHeroDotGraphic()
-        Spacer(modifier = Modifier.height(32.dp))
+        DotapMascot(modifier = Modifier.size(160.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         IntroHeader()
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -56,44 +55,6 @@ internal fun IntroBody(
             Text(
                 text = stringResource(R.string.onboarding_get_started),
                 style = MaterialTheme.typography.labelLarge,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TactileHeroDotGraphic() {
-    Box(
-        modifier = Modifier
-            .size(140.dp)
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = HERO_OUTER_ALPHA),
-                shape = CircleShape,
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
-        InnerHeroGraphic()
-    }
-}
-
-@Composable
-private fun InnerHeroGraphic() {
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .background(color = MaterialTheme.colorScheme.primaryContainer, shape = CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(color = MaterialTheme.colorScheme.onPrimary, shape = CircleShape),
             )
         }
     }

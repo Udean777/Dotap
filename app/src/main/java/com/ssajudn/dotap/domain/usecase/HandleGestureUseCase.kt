@@ -25,6 +25,6 @@ class HandleGestureUseCase(
         if (settings.isHapticsEnabled) {
             hapticFeedback.tick()
         }
-        return executeActionUseCase(action)
+        return executeActionUseCase(action, settings.appPackageFor(gesture))
     }
 }

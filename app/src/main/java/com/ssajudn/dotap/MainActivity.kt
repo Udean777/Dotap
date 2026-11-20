@@ -7,9 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.di.AppContainer
+import com.ssajudn.dotap.presentation.common.LocalAppIconLoader
 import com.ssajudn.dotap.presentation.navigation.Destinations
 import com.ssajudn.dotap.presentation.navigation.DotapNavHost
 import com.ssajudn.dotap.presentation.navigation.SystemActions
@@ -60,11 +62,13 @@ private fun MainAppContent(
     } else {
         Destinations.ONBOARDING
     }
-    DotapTheme {
-        DotapNavHost(
-            factories = container.screenViewModelFactories,
-            systemActions = systemActions,
-            startDestination = startDestination,
-        )
+    CompositionLocalProvider(LocalAppIconLoader provides container.appIconLoader) {
+        DotapTheme {
+            DotapNavHost(
+                factories = container.screenViewModelFactories,
+                systemActions = systemActions,
+                startDestination = startDestination,
+            )
+        }
     }
 }

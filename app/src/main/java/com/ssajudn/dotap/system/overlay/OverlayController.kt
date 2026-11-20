@@ -43,9 +43,9 @@ class OverlayController(
         val params = buildLayoutParams(state, dotSizePx, screenSize)
         layoutParams = params
 
-        val view = createDotView(
+        val view = DotView(
             context = context,
-            onTouch = { _, event -> handleTouchEvent(event, presenter, gestureEngine) },
+            onTouchListener = { _, event -> handleTouchEvent(event, presenter, gestureEngine) },
             actions = DotView.ClickActions(
                 onClick = { accessibilityClick?.invoke() },
                 onLongClick = { accessibilityLongClick?.invoke() },
@@ -61,20 +61,8 @@ class OverlayController(
         val view = dotView ?: return
         val params = layoutParams ?: return
         view.render(state)
-
-        val dotSizePx = context.dpToPx(state.dotSizeDp)
-        params.width = dotSizePx
-        params.height = dotSizePx
-
-        val screenSize = getScreenSize(windowManager)
-        val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
-        params.y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
-        params.x = resolveX(state, dotSizePx, screenSize)
-
-        try {
-            windowManager.updateViewLayout(view, params)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "IllegalArgumentException updating overlay view", e)
+        if (params.syncWith(context, windowManager, state)) {
+            windowManager.updateViewLayoutSafely(view, params, "updating overlay view")
         }
     }
 
@@ -100,18 +88,8 @@ class OverlayController(
             return
         }
         val params = layoutParams ?: return
-        val state = presenter.uiState.value
-        val dotSizePx = context.dpToPx(state.dotSizeDp)
-        val screenSize = getScreenSize(windowManager)
-
-        val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
-        params.y = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
-        params.x = resolveX(state, dotSizePx, screenSize)
-
-        try {
-            windowManager.updateViewLayout(view, params)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "IllegalArgumentException updating view on config changed", e)
+        if (params.syncWith(context, windowManager, presenter.uiState.value)) {
+            windowManager.updateViewLayoutSafely(view, params, "updating view on config changed")
         }
     }
 
@@ -133,12 +111,7 @@ class OverlayController(
         currentDragY += dy
         params.x = currentDragX.toInt().coerceIn(0, maxX)
         params.y = currentDragY.toInt().coerceIn(0, maxY)
-
-        try {
-            windowManager.updateViewLayout(view, params)
-        } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "IllegalArgumentException updating view on drag", e)
-        }
+        windowManager.updateViewLayoutSafely(view, params, "updating view on drag")
     }
 
     fun onDragEnd() {
@@ -176,6 +149,9 @@ class OverlayController(
     override fun showMessage(message: MessageType) {
         val textRes = when (message) {
             MessageType.SCREENSHOT_UNAVAILABLE -> R.string.screenshot_unavailable
+            MessageType.FLASHLIGHT_UNAVAILABLE -> R.string.flashlight_unavailable
+            MessageType.APP_NOT_CONFIGURED -> R.string.app_not_configured
+            MessageType.APP_LAUNCH_FAILED -> R.string.app_launch_failed
         }
         Toast.makeText(context, textRes, Toast.LENGTH_SHORT).show()
     }

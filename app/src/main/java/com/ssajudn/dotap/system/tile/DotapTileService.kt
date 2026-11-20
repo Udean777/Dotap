@@ -8,7 +8,6 @@ import android.service.quicksettings.TileService
 import com.ssajudn.dotap.DotapApp
 import com.ssajudn.dotap.MainActivity
 import com.ssajudn.dotap.R
-import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.ServiceStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -17,9 +16,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class DotapTileService : TileService() {
+    private var serviceScope: CoroutineScope? = null
     private var listeningScope: CoroutineScope? = null
     private var currentStatus: ServiceStatus = ServiceStatus.DISABLED
-    private var currentSettings: DotSettings? = null
 
     override fun onStartListening() {
         super.onStartListening()
@@ -35,7 +34,6 @@ class DotapTileService : TileService() {
                 ::Pair,
             ).collect { (status, settings) ->
                 currentStatus = status
-                currentSettings = settings
                 updateTileState(status, settings.isDotEnabled)
             }
         }
@@ -47,13 +45,17 @@ class DotapTileService : TileService() {
         super.onStopListening()
     }
 
+    override fun onDestroy() {
+        serviceScope?.cancel()
+        serviceScope = null
+        super.onDestroy()
+    }
+
     override fun onClick() {
         super.onClick()
         val app = application as? DotapApp ?: return
         if (currentStatus == ServiceStatus.ENABLED_CONNECTED) {
-            val scope = listeningScope ?: CoroutineScope(
-                SupervisorJob() + app.container.dispatcherProvider.main,
-            )
+            val scope = listeningScope ?: ensureServiceScope(app)
             scope.launch {
                 app.container.settingsRepository.update { current ->
                     current.copy(isDotEnabled = !current.isDotEnabled)
@@ -63,6 +65,10 @@ class DotapTileService : TileService() {
             launchMainActivity()
         }
     }
+
+    private fun ensureServiceScope(app: DotapApp): CoroutineScope = serviceScope ?: CoroutineScope(
+        SupervisorJob() + app.container.dispatcherProvider.main,
+    ).also { serviceScope = it }
 
     private fun updateTileState(status: ServiceStatus, isDotEnabled: Boolean) {
         val tile = qsTile ?: return

@@ -94,20 +94,16 @@ class GestureEngineTest {
         engine.down(0f, 0f)
         assertTrue(scheduler.hasPending("LONG_PRESS"))
 
-        // Move within slop does not start drag
         engine.move(5f, 0f)
         assertEquals(emptyList<String>(), listener.events)
 
-        // Move beyond slop starts drag
         engine.move(15f, 0f)
         assertFalse(scheduler.hasPending("LONG_PRESS"))
         assertEquals(listOf("drag_start", "drag"), listener.events)
 
-        // More drag
         engine.move(25f, 0f)
         assertEquals(listOf("drag_start", "drag", "drag"), listener.events)
 
-        // Up finishes drag
         engine.up()
         assertEquals(listOf("drag_start", "drag", "drag", "drag_end"), listener.events)
     }
@@ -136,7 +132,6 @@ class GestureEngineTest {
         engine.up()
         assertEquals(emptyList<String>(), listener.events)
 
-        // Second touch starts and drags
         engine.down(0f, 0f)
         engine.move(20f, 0f)
         engine.up()

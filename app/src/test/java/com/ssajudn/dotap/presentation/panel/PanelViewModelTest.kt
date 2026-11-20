@@ -3,12 +3,15 @@ package com.ssajudn.dotap.presentation.panel
 import app.cash.turbine.test
 import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.model.Defaults
-import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.MessageType
+import com.ssajudn.dotap.domain.model.PanelSlot
 import com.ssajudn.dotap.domain.port.ActionPerformer
 import com.ssajudn.dotap.domain.port.OverlayVisibility
 import com.ssajudn.dotap.domain.usecase.ExecuteActionUseCase
 import com.ssajudn.dotap.domain.usecase.TakeScreenshotUseCase
+import com.ssajudn.dotap.testutil.FakeAppLauncher
+import com.ssajudn.dotap.testutil.FakeFlashlightController
+import com.ssajudn.dotap.testutil.FakeInstalledAppsRepository
 import com.ssajudn.dotap.testutil.FakePanelLauncher
 import com.ssajudn.dotap.testutil.FakeSettingsRepository
 import com.ssajudn.dotap.testutil.TestDispatcherProvider
@@ -25,9 +28,11 @@ import org.junit.Test
 class PanelViewModelTest {
 
     private lateinit var settingsRepository: FakeSettingsRepository
+    private lateinit var installedAppsRepository: FakeInstalledAppsRepository
     private lateinit var actionPerformer: FakeActionPerformer
     private lateinit var overlayVisibility: FakeOverlayVisibility
     private lateinit var panelLauncher: FakePanelLauncher
+    private lateinit var appLauncher: FakeAppLauncher
     private lateinit var executeActionUseCase: ExecuteActionUseCase
     private lateinit var testScope: TestScope
     private lateinit var viewModel: PanelViewModel
@@ -35,26 +40,31 @@ class PanelViewModelTest {
     @Before
     fun setUp() {
         settingsRepository = FakeSettingsRepository()
+        installedAppsRepository = FakeInstalledAppsRepository()
         actionPerformer = FakeActionPerformer()
         overlayVisibility = FakeOverlayVisibility()
         panelLauncher = FakePanelLauncher()
-        val screenshotUseCase = TakeScreenshotUseCase(
-            overlayVisibility = overlayVisibility,
-            actionPerformer = actionPerformer,
-            hideDelayMs = 0L,
-            restoreDelayMs = 0L,
-        )
-        executeActionUseCase = ExecuteActionUseCase(
-            actionPerformer = actionPerformer,
-            takeScreenshotUseCase = screenshotUseCase,
-            panelLauncher = panelLauncher,
-        )
+        appLauncher = FakeAppLauncher()
+        executeActionUseCase = createExecuteUseCase()
         testScope = TestScope()
         viewModel = PanelViewModel(
             settingsRepository = settingsRepository,
+            installedAppsRepository = installedAppsRepository,
             executeAction = executeActionUseCase,
             actionScope = testScope,
             dispatcherProvider = TestDispatcherProvider(),
+        )
+    }
+
+    private fun createExecuteUseCase(): ExecuteActionUseCase {
+        val screenshotUseCase = TakeScreenshotUseCase(overlayVisibility, actionPerformer, 0L, 0L)
+        return ExecuteActionUseCase(
+            actionPerformer = actionPerformer,
+            takeScreenshotUseCase = screenshotUseCase,
+            panelLauncher = panelLauncher,
+            flashlightController = FakeFlashlightController(),
+            appLauncher = appLauncher,
+            overlayVisibility = overlayVisibility,
         )
     }
 
@@ -63,10 +73,13 @@ class PanelViewModelTest {
         viewModel.uiState.test {
             assertEquals(Defaults.DEFAULT_PANEL_SLOTS, awaitItem().slots)
 
-            val customSlots = listOf(ActionType.BACK, ActionType.HOME, ActionType.RECENTS)
+            val customSlots = listOf(ActionType.BACK, ActionType.HOME, ActionType.RECENTS).map(::PanelSlot)
             settingsRepository.update { it.copy(panelSlots = customSlots) }
 
-            assertEquals(customSlots, awaitItem().slots)
+            val updated = awaitItem().let { item ->
+                if (item.slots == Defaults.DEFAULT_PANEL_SLOTS) awaitItem() else item
+            }
+            assertEquals(customSlots, updated.slots)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -74,10 +87,22 @@ class PanelViewModelTest {
     @Test
     fun `SlotSelected event executes action and emits Close effect`() = runTest {
         viewModel.uiEffect.test {
-            viewModel.onEvent(PanelUiEvent.SlotSelected(ActionType.HOME))
+            viewModel.onEvent(PanelUiEvent.SlotSelected(PanelSlot(ActionType.HOME)))
             testScope.advanceUntilIdle()
 
             assertEquals(listOf(ActionType.HOME), actionPerformer.performedActions)
+            assertEquals(PanelUiEffect.Close, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `SlotSelected with launch app opens slot target package`() = runTest {
+        viewModel.uiEffect.test {
+            viewModel.onEvent(PanelUiEvent.SlotSelected(PanelSlot(ActionType.LAUNCH_APP, "com.whatsapp")))
+            testScope.advanceUntilIdle()
+
+            assertEquals(listOf("com.whatsapp"), appLauncher.launchedPackages)
             assertEquals(PanelUiEffect.Close, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
@@ -98,7 +123,7 @@ class PanelViewModelTest {
     @Test
     fun `SlotSelected with screenshot hides overlay, performs screenshot and emits Close effect`() = runTest {
         viewModel.uiEffect.test {
-            viewModel.onEvent(PanelUiEvent.SlotSelected(ActionType.SCREENSHOT))
+            viewModel.onEvent(PanelUiEvent.SlotSelected(PanelSlot(ActionType.SCREENSHOT)))
             testScope.advanceUntilIdle()
 
             assertTrue(overlayVisibility.wasHidden)

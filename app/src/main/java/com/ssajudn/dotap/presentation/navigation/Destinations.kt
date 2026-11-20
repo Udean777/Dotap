@@ -6,5 +6,6 @@ object Destinations {
     const val SETTINGS = "settings"
     const val GESTURES = "gestures"
     const val APPEARANCE = "appearance"
+    const val PANEL_SETTINGS = "panel_settings"
     const val BATTERY_GUIDANCE = "battery_guidance"
 }

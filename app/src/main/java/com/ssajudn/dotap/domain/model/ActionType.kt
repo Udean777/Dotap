@@ -13,6 +13,8 @@ enum class ActionType(val canBePanelSlot: Boolean = true) {
     QUICK_SETTINGS,
     POWER_DIALOG,
     LOCK_SCREEN,
+    FLASHLIGHT,
+    LAUNCH_APP,
     OPEN_PANEL(canBePanelSlot = false),
     NONE(canBePanelSlot = false),
 }

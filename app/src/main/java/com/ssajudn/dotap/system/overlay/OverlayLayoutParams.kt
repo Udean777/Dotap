@@ -54,4 +54,36 @@ internal fun resolveX(state: DotUiState, dotSizePx: Int, screenSize: Point): Int
 
 internal fun Context.dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
+internal fun WindowManager.LayoutParams.syncWith(
+    context: Context,
+    windowManager: WindowManager,
+    state: DotUiState,
+): Boolean {
+    val dotSizePx = context.dpToPx(state.dotSizeDp)
+    val screenSize = getScreenSize(windowManager)
+    val maxY = (screenSize.y - dotSizePx).coerceAtLeast(0)
+    val nextY = (maxY * state.yRatio).toInt().coerceIn(0, maxY)
+    val nextX = resolveX(state, dotSizePx, screenSize)
+    val changed = width != dotSizePx || height != dotSizePx || x != nextX || y != nextY
+    if (changed) {
+        width = dotSizePx
+        height = dotSizePx
+        x = nextX
+        y = nextY
+    }
+    return changed
+}
+
+internal fun WindowManager.updateViewLayoutSafely(
+    view: View,
+    params: WindowManager.LayoutParams,
+    contextDescription: String,
+) {
+    try {
+        updateViewLayout(view, params)
+    } catch (e: IllegalArgumentException) {
+        Log.e(TAG, "IllegalArgumentException $contextDescription", e)
+    }
+}
+
 private const val TAG = "OverlayLayoutParams"

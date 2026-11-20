@@ -73,6 +73,11 @@ fun GestureActionsCard(
 private fun buildGestureRowSpecs(
     state: GesturesUiState,
     onEvent: (GesturesUiEvent) -> Unit,
+): List<GestureRowSpec> = tapGestureRowSpecs(state, onEvent) + swipeGestureRowSpecs(state, onEvent)
+
+private fun tapGestureRowSpecs(
+    state: GesturesUiState,
+    onEvent: (GesturesUiEvent) -> Unit,
 ): List<GestureRowSpec> {
     val s = state.settings
     return listOf(
@@ -101,6 +106,37 @@ private fun buildGestureRowSpecs(
             onActionSelected = { onEvent(GesturesUiEvent.LongPressActionSelected(it)) },
         ),
     )
+}
+
+private fun swipeGestureRowSpecs(
+    state: GesturesUiState,
+    onEvent: (GesturesUiEvent) -> Unit,
+): List<GestureRowSpec> {
+    val s = state.settings
+    return listOf(
+        Triple(GestureType.SWIPE_UP, R.string.gesture_swipe_up_label, s.swipeUpAction),
+        Triple(GestureType.SWIPE_DOWN, R.string.gesture_swipe_down_label, s.swipeDownAction),
+        Triple(GestureType.SWIPE_LEFT, R.string.gesture_swipe_left_label, s.swipeLeftAction),
+        Triple(GestureType.SWIPE_RIGHT, R.string.gesture_swipe_right_label, s.swipeRightAction),
+    ).map { (gesture, labelRes, selected) ->
+        GestureRowSpec(
+            gesture = gesture,
+            labelRes = labelRes,
+            selectedAction = selected,
+            selectedAppPackage = null,
+            appLabels = state.appLabels,
+            onActionSelected = { action ->
+                val event = when (gesture) {
+                    GestureType.SWIPE_UP -> GesturesUiEvent.SwipeUpActionSelected(action)
+                    GestureType.SWIPE_DOWN -> GesturesUiEvent.SwipeDownActionSelected(action)
+                    GestureType.SWIPE_LEFT -> GesturesUiEvent.SwipeLeftActionSelected(action)
+                    GestureType.SWIPE_RIGHT -> GesturesUiEvent.SwipeRightActionSelected(action)
+                    else -> return@GestureRowSpec
+                }
+                onEvent(event)
+            },
+        )
+    }
 }
 
 @Composable

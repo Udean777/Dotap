@@ -25,6 +25,7 @@ import com.ssajudn.dotap.presentation.common.LocalAppIconLoader
 import com.ssajudn.dotap.presentation.panel.PanelRoute
 import com.ssajudn.dotap.presentation.panel.PanelViewModel
 import com.ssajudn.dotap.system.overlay.AndroidHapticFeedback
+import com.ssajudn.dotap.system.overlay.AppSearchHost
 import com.ssajudn.dotap.system.overlay.DotPresenter
 import com.ssajudn.dotap.system.overlay.HandlerScheduler
 import com.ssajudn.dotap.system.overlay.OverlayController
@@ -141,6 +142,7 @@ class DotapAccessibilityService : AccessibilityService() {
         return PanelHost(
             context = this,
             anchorProvider = { overlayController?.view },
+            onOpenAppSearch = { openAppSearchOverlay(scope, app) },
             content = { onClose ->
                 CompositionLocalProvider(LocalAppIconLoader provides app.container.appIconLoader) {
                     PanelRoute(onClose = onClose, viewModel = viewModel(factory = factory))
@@ -235,4 +237,28 @@ private fun updateEngineConfig(
             isLongPressAssigned = settings.longPressAction != ActionType.NONE,
         ),
     )
+}
+
+private fun DotapAccessibilityService.openAppSearchOverlay(
+    scope: kotlinx.coroutines.CoroutineScope,
+    app: com.ssajudn.dotap.DotapApp,
+) {
+    val host = AppSearchHost(
+        context = this,
+        windowManager = getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager,
+        appIconLoader = app.container.appIconLoader,
+    )
+    scope.launch(app.container.dispatcherProvider.main) {
+        val apps = app.container.installedAppsRepository.getLaunchableApps()
+        host.show(
+            apps = apps,
+            onAppSelected = { pkg ->
+                host.hide()
+                packageManager.getLaunchIntentForPackage(pkg)?.let { intent ->
+                    startActivity(intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+            },
+            onDismiss = host::hide,
+        )
+    }
 }

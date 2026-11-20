@@ -14,11 +14,7 @@ class HandleGestureUseCase(
 ) {
     suspend operator fun invoke(gesture: GestureType): ActionResult {
         val settings = settingsRepository.settings.first()
-        val action = when (gesture) {
-            GestureType.SINGLE_TAP -> settings.singleTapAction
-            GestureType.DOUBLE_TAP -> settings.doubleTapAction
-            GestureType.LONG_PRESS -> settings.longPressAction
-        }
+        val action = actionForGesture(gesture, settings)
         if (action == ActionType.NONE) {
             return ActionResult.Success
         }
@@ -27,4 +23,17 @@ class HandleGestureUseCase(
         }
         return executeActionUseCase(action, settings.appPackageFor(gesture))
     }
+}
+
+private fun actionForGesture(
+    gesture: GestureType,
+    settings: com.ssajudn.dotap.domain.model.DotSettings,
+): ActionType = when (gesture) {
+    GestureType.SINGLE_TAP -> settings.singleTapAction
+    GestureType.DOUBLE_TAP -> settings.doubleTapAction
+    GestureType.LONG_PRESS -> settings.longPressAction
+    GestureType.SWIPE_UP -> settings.swipeUpAction
+    GestureType.SWIPE_DOWN -> settings.swipeDownAction
+    GestureType.SWIPE_LEFT -> settings.swipeLeftAction
+    GestureType.SWIPE_RIGHT -> settings.swipeRightAction
 }

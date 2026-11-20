@@ -4,4 +4,6 @@ interface PanelLauncher {
     fun open()
 
     fun close()
+
+    fun openAppSearch() {}
 }

@@ -30,6 +30,11 @@ class ExecuteActionUseCase(
             ActionResult.Success
         }
 
+        ActionType.SEARCH_APPS -> {
+            panelLauncher.openAppSearch()
+            ActionResult.Success
+        }
+
         ActionType.FLASHLIGHT -> toggleFlashlight()
 
         ActionType.LAUNCH_APP -> launchApp(appPackage)

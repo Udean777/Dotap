@@ -5,4 +5,5 @@ import com.ssajudn.dotap.domain.model.DotSettings
 data class AppearanceUiState(
     val settings: DotSettings = DotSettings.Default,
     val isLoading: Boolean = true,
+    val imagePickError: Boolean = false,
 )

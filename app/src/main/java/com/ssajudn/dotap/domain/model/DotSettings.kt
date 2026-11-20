@@ -10,6 +10,10 @@ data class DotSettings(
     val singleTapAction: ActionType = Defaults.ACTION_SINGLE_TAP,
     val doubleTapAction: ActionType = Defaults.ACTION_DOUBLE_TAP,
     val longPressAction: ActionType = Defaults.ACTION_LONG_PRESS,
+    val swipeUpAction: ActionType = ActionType.NONE,
+    val swipeDownAction: ActionType = ActionType.NONE,
+    val swipeLeftAction: ActionType = ActionType.NONE,
+    val swipeRightAction: ActionType = ActionType.NONE,
     val singleTapAppPackage: String? = null,
     val doubleTapAppPackage: String? = null,
     val longPressAppPackage: String? = null,
@@ -19,6 +23,8 @@ data class DotSettings(
     val isRightSide: Boolean = Defaults.DOT_SIDE_RIGHT,
     val yRatio: Float = Defaults.DOT_Y_RATIO,
     val isOnboardingCompleted: Boolean = Defaults.ONBOARDING_COMPLETED,
+    val dotStyle: DotStyle = DotStyle.DEFAULT,
+    val customDotImagePath: String? = null,
 ) {
     /** Idle opacity as a 0..1 alpha; 100% is the upper limit and means no fading. */
     val idleAlpha: Float get() = idleOpacityPercent.toFloat() / Limits.MAX_IDLE_OPACITY_PERCENT
@@ -60,16 +66,32 @@ data class DotSettings(
 
     fun appPackageFor(gesture: GestureType): String? = when (gesture) {
         GestureType.SINGLE_TAP -> singleTapAppPackage
+
         GestureType.DOUBLE_TAP -> doubleTapAppPackage
+
         GestureType.LONG_PRESS -> longPressAppPackage
+
+        GestureType.SWIPE_UP,
+        GestureType.SWIPE_DOWN,
+        GestureType.SWIPE_LEFT,
+        GestureType.SWIPE_RIGHT,
+        -> null
     }
 
     fun withGestureApp(gesture: GestureType, packageName: String?): DotSettings {
         val normalized = packageName?.trim()?.takeIf { it.isNotEmpty() }
         return when (gesture) {
             GestureType.SINGLE_TAP -> copy(singleTapAppPackage = normalized)
+
             GestureType.DOUBLE_TAP -> copy(doubleTapAppPackage = normalized)
+
             GestureType.LONG_PRESS -> copy(longPressAppPackage = normalized)
+
+            GestureType.SWIPE_UP,
+            GestureType.SWIPE_DOWN,
+            GestureType.SWIPE_LEFT,
+            GestureType.SWIPE_RIGHT,
+            -> this
         }
     }
 

@@ -10,6 +10,14 @@ sealed interface GesturesUiEvent {
 
     data class LongPressActionSelected(val action: ActionType) : GesturesUiEvent
 
+    data class SwipeUpActionSelected(val action: ActionType) : GesturesUiEvent
+
+    data class SwipeDownActionSelected(val action: ActionType) : GesturesUiEvent
+
+    data class SwipeLeftActionSelected(val action: ActionType) : GesturesUiEvent
+
+    data class SwipeRightActionSelected(val action: ActionType) : GesturesUiEvent
+
     data class DoubleTapTimeoutChanged(val millis: Int) : GesturesUiEvent
 
     data class LongPressDurationChanged(val millis: Int) : GesturesUiEvent

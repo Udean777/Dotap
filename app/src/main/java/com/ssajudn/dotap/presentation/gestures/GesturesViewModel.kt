@@ -53,15 +53,6 @@ class GesturesViewModel(
     fun onEvent(event: GesturesUiEvent) {
         viewModelScope.launch(dispatcherProvider.main) {
             when (event) {
-                is GesturesUiEvent.SingleTapActionSelected ->
-                    selectAction(GestureType.SINGLE_TAP, event.action)
-
-                is GesturesUiEvent.DoubleTapActionSelected ->
-                    selectAction(GestureType.DOUBLE_TAP, event.action)
-
-                is GesturesUiEvent.LongPressActionSelected ->
-                    selectAction(GestureType.LONG_PRESS, event.action)
-
                 is GesturesUiEvent.DoubleTapTimeoutChanged -> settingsRepository.update {
                     it.withDoubleTapTimeout(event.millis.toLong())
                 }
@@ -78,20 +69,29 @@ class GesturesViewModel(
                 }
 
                 GesturesUiEvent.DismissAppPicker -> activePickerGesture.value = null
+
+                else -> handleActionEvent(event)
             }
+        }
+    }
+
+    private suspend fun handleActionEvent(event: GesturesUiEvent) {
+        when (event) {
+            is GesturesUiEvent.SingleTapActionSelected -> selectAction(GestureType.SINGLE_TAP, event.action)
+            is GesturesUiEvent.DoubleTapActionSelected -> selectAction(GestureType.DOUBLE_TAP, event.action)
+            is GesturesUiEvent.LongPressActionSelected -> selectAction(GestureType.LONG_PRESS, event.action)
+            is GesturesUiEvent.SwipeUpActionSelected -> selectAction(GestureType.SWIPE_UP, event.action)
+            is GesturesUiEvent.SwipeDownActionSelected -> selectAction(GestureType.SWIPE_DOWN, event.action)
+            is GesturesUiEvent.SwipeLeftActionSelected -> selectAction(GestureType.SWIPE_LEFT, event.action)
+            is GesturesUiEvent.SwipeRightActionSelected -> selectAction(GestureType.SWIPE_RIGHT, event.action)
+            else -> Unit
         }
     }
 
     private suspend fun selectAction(gesture: GestureType, action: ActionType) {
         val shouldOpenPicker = action == ActionType.LAUNCH_APP &&
             settingsRepository.settings.first().appPackageFor(gesture) == null
-        settingsRepository.update { current ->
-            when (gesture) {
-                GestureType.SINGLE_TAP -> current.copy(singleTapAction = action)
-                GestureType.DOUBLE_TAP -> current.copy(doubleTapAction = action)
-                GestureType.LONG_PRESS -> current.copy(longPressAction = action)
-            }
-        }
+        settingsRepository.update { current -> applyGestureAction(current, gesture, action) }
         if (shouldOpenPicker) {
             activePickerGesture.value = gesture
         }
@@ -100,4 +100,18 @@ class GesturesViewModel(
     private companion object {
         const val STOP_TIMEOUT_MS = 5_000L
     }
+}
+
+private fun applyGestureAction(
+    current: com.ssajudn.dotap.domain.model.DotSettings,
+    gesture: GestureType,
+    action: ActionType,
+): com.ssajudn.dotap.domain.model.DotSettings = when (gesture) {
+    GestureType.SINGLE_TAP -> current.copy(singleTapAction = action)
+    GestureType.DOUBLE_TAP -> current.copy(doubleTapAction = action)
+    GestureType.LONG_PRESS -> current.copy(longPressAction = action)
+    GestureType.SWIPE_UP -> current.copy(swipeUpAction = action)
+    GestureType.SWIPE_DOWN -> current.copy(swipeDownAction = action)
+    GestureType.SWIPE_LEFT -> current.copy(swipeLeftAction = action)
+    GestureType.SWIPE_RIGHT -> current.copy(swipeRightAction = action)
 }

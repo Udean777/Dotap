@@ -4,6 +4,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import com.ssajudn.dotap.domain.model.ActionType
 import com.ssajudn.dotap.domain.model.DotSettings
+import com.ssajudn.dotap.domain.model.DotStyle
 import com.ssajudn.dotap.domain.model.Limits
 import com.ssajudn.dotap.domain.model.PanelSlot
 
@@ -24,6 +25,10 @@ internal class SettingsMapper {
             singleTapAction = preferences[SettingsKeys.ACTION_SINGLE].toActionType(d.singleTapAction),
             doubleTapAction = preferences[SettingsKeys.ACTION_DOUBLE].toActionType(d.doubleTapAction),
             longPressAction = preferences[SettingsKeys.ACTION_LONG].toActionType(d.longPressAction),
+            swipeUpAction = preferences[SettingsKeys.ACTION_SWIPE_UP].toActionType(d.swipeUpAction),
+            swipeDownAction = preferences[SettingsKeys.ACTION_SWIPE_DOWN].toActionType(d.swipeDownAction),
+            swipeLeftAction = preferences[SettingsKeys.ACTION_SWIPE_LEFT].toActionType(d.swipeLeftAction),
+            swipeRightAction = preferences[SettingsKeys.ACTION_SWIPE_RIGHT].toActionType(d.swipeRightAction),
             singleTapAppPackage = preferences[SettingsKeys.SINGLE_TAP_APP]?.takeIf { it.isNotBlank() },
             doubleTapAppPackage = preferences[SettingsKeys.DOUBLE_TAP_APP]?.takeIf { it.isNotBlank() },
             longPressAppPackage = preferences[SettingsKeys.LONG_PRESS_APP]?.takeIf { it.isNotBlank() },
@@ -33,6 +38,8 @@ internal class SettingsMapper {
             isRightSide = preferences.value(SettingsKeys.DOT_SIDE, SIDE_RIGHT) != SIDE_LEFT,
             yRatio = preferences.value(SettingsKeys.DOT_Y_RATIO, d.yRatio),
             isOnboardingCompleted = preferences.value(SettingsKeys.ONBOARDING_COMPLETED, d.isOnboardingCompleted),
+            dotStyle = toDotStyle(preferences[SettingsKeys.DOT_STYLE], d.dotStyle),
+            customDotImagePath = preferences[SettingsKeys.CUSTOM_DOT_IMAGE_PATH]?.takeIf { it.isNotBlank() },
         ).withClampedValues()
     }
 
@@ -53,6 +60,10 @@ internal class SettingsMapper {
         preferences[SettingsKeys.ACTION_SINGLE] = settings.singleTapAction.name
         preferences[SettingsKeys.ACTION_DOUBLE] = settings.doubleTapAction.name
         preferences[SettingsKeys.ACTION_LONG] = settings.longPressAction.name
+        preferences[SettingsKeys.ACTION_SWIPE_UP] = settings.swipeUpAction.name
+        preferences[SettingsKeys.ACTION_SWIPE_DOWN] = settings.swipeDownAction.name
+        preferences[SettingsKeys.ACTION_SWIPE_LEFT] = settings.swipeLeftAction.name
+        preferences[SettingsKeys.ACTION_SWIPE_RIGHT] = settings.swipeRightAction.name
         writeOptionalString(preferences, SettingsKeys.SINGLE_TAP_APP, settings.singleTapAppPackage)
         writeOptionalString(preferences, SettingsKeys.DOUBLE_TAP_APP, settings.doubleTapAppPackage)
         writeOptionalString(preferences, SettingsKeys.LONG_PRESS_APP, settings.longPressAppPackage)
@@ -62,6 +73,8 @@ internal class SettingsMapper {
         preferences[SettingsKeys.DOT_SIDE] = if (settings.isRightSide) SIDE_RIGHT else SIDE_LEFT
         preferences[SettingsKeys.DOT_Y_RATIO] = settings.yRatio
         preferences[SettingsKeys.ONBOARDING_COMPLETED] = settings.isOnboardingCompleted
+        preferences[SettingsKeys.DOT_STYLE] = settings.dotStyle.name
+        writeOptionalString(preferences, SettingsKeys.CUSTOM_DOT_IMAGE_PATH, settings.customDotImagePath)
     }
 
     private fun writeOptionalString(
@@ -120,3 +133,8 @@ internal class SettingsMapper {
         const val SLOT_APP_SEPARATOR = ':'
     }
 }
+
+private fun toDotStyle(
+    stored: String?,
+    fallback: DotStyle,
+): DotStyle = DotStyle.entries.firstOrNull { it.name == stored } ?: fallback

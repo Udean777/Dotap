@@ -2,6 +2,7 @@ package com.ssajudn.dotap.presentation.appearance
 
 import app.cash.turbine.test
 import com.ssajudn.dotap.domain.model.Limits
+import com.ssajudn.dotap.domain.port.CustomDotImageStorage
 import com.ssajudn.dotap.testutil.FakeSettingsRepository
 import com.ssajudn.dotap.testutil.TestDispatcherProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +20,10 @@ class AppearanceViewModelTest {
     @Before
     fun setUp() {
         repository = FakeSettingsRepository()
-        viewModel = AppearanceViewModel(repository, TestDispatcherProvider())
+        val fakeStorage = object : CustomDotImageStorage {
+            override suspend fun saveFromUri(uriString: String): String = "/tmp/custom.webp"
+        }
+        viewModel = AppearanceViewModel(repository, fakeStorage, TestDispatcherProvider())
     }
 
     @Test

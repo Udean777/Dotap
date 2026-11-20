@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ssajudn.dotap.data.apps.PackageManagerInstalledAppsRepository
+import com.ssajudn.dotap.data.settings.AndroidCustomDotImageStorage
 import com.ssajudn.dotap.data.settings.DataStoreSettingsRepository
 import com.ssajudn.dotap.data.settings.settingsDataStore
 import com.ssajudn.dotap.data.status.AccessibilityStatusRepository
@@ -112,6 +113,7 @@ class AppContainer(
             initializer {
                 AppearanceViewModel(
                     settingsRepository = settingsRepository,
+                    customDotImageStorage = AndroidCustomDotImageStorage(appContext, dispatcherProvider),
                     dispatcherProvider = dispatcherProvider,
                 )
             }

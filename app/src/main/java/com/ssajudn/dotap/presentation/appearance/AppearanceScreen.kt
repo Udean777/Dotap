@@ -1,5 +1,8 @@
 package com.ssajudn.dotap.presentation.appearance
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,7 +34,19 @@ fun AppearanceRoute(
     onBack: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    AppearanceScreen(state = state, onEvent = viewModel::onEvent, onBack = onBack)
+    val pickMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        viewModel.onEvent(AppearanceUiEvent.CustomImagePicked(uri?.toString()))
+    }
+    AppearanceScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onBack = onBack,
+        onPickImageClick = {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+    )
 }
 
 @Composable
@@ -39,6 +54,7 @@ fun AppearanceScreen(
     state: AppearanceUiState,
     onEvent: (AppearanceUiEvent) -> Unit,
     onBack: () -> Unit,
+    onPickImageClick: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -49,7 +65,12 @@ fun AppearanceScreen(
         },
         containerColor = MaterialTheme.colorScheme.surface,
     ) { innerPadding ->
-        AppearanceBody(state = state, onEvent = onEvent, innerPadding = innerPadding)
+        AppearanceBody(
+            state = state,
+            onEvent = onEvent,
+            onPickImageClick = onPickImageClick,
+            modifier = Modifier.padding(innerPadding),
+        )
     }
 }
 
@@ -57,12 +78,12 @@ fun AppearanceScreen(
 private fun AppearanceBody(
     state: AppearanceUiState,
     onEvent: (AppearanceUiEvent) -> Unit,
-    innerPadding: PaddingValues,
+    onPickImageClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .padding(innerPadding)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -70,6 +91,12 @@ private fun AppearanceBody(
         LiveDotPreviewCard(
             dotSizeDp = state.settings.dotSizeDp,
             idleOpacityPercent = state.settings.idleOpacityPercent,
+        )
+        ExpressiveSectionHeader(text = stringResource(R.string.appearance_style_section))
+        DotStyleCard(
+            state = state,
+            onStyleSelected = { onEvent(AppearanceUiEvent.DotStyleSelected(it)) },
+            onPickImageClick = onPickImageClick,
         )
         ExpressiveSectionHeader(text = stringResource(R.string.appearance_behavior_section))
         BehaviorCard(settings = state.settings, onEvent = onEvent)

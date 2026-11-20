@@ -133,4 +133,18 @@
     <string name="app_picker_search_hint">Cari aplikasi</string>
     <string name="app_picker_empty">Tidak ada aplikasi yang cocok</string>
     <string name="mascot_cd_dotap">Maskot kucing Dotap</string>
+    <string name="appearance_style_section">Gaya Dot</string>
+    <string name="dot_style_default">Dot Standar</string>
+    <string name="dot_style_app_icon">Ikon Aplikasi</string>
+    <string name="dot_style_custom_image">Gambar Sendiri</string>
+    <string name="dot_style_pick_image">Pilih Gambar</string>
+    <string name="dot_style_image_error">Gagal memuat gambar yang dipilih. Coba foto lain.</string>
+    <string name="gesture_swipe_up_label">Geser ke Atas</string>
+    <string name="gesture_swipe_down_label">Geser ke Bawah</string>
+    <string name="gesture_swipe_left_label">Geser ke Kiri</string>
+    <string name="gesture_swipe_right_label">Geser ke Kanan</string>
+    <string name="action_search_apps">Cari Aplikasi</string>
+    <string name="app_search_hint">Cari aplikasi untuk dibuka…</string>
+    <string name="app_search_empty">Tidak ada aplikasi yang cocok</string>
+    <string name="app_search_close_desc">Tutup pencarian aplikasi</string>
 </resources>

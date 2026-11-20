@@ -3,14 +3,19 @@ package com.ssajudn.dotap.system.overlay
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Rect
+import android.graphics.RectF
 import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import com.ssajudn.dotap.R
+import com.ssajudn.dotap.domain.model.DotStyle
 
 @SuppressLint("ViewConstructor")
 class DotView(
@@ -45,6 +50,21 @@ class DotView(
     var isMenuOpen: Boolean = false
         private set
 
+    private var dotStyle: DotStyle = DotStyle.DEFAULT
+    private var isIdlePeeking: Boolean = false
+    private var isRightSide: Boolean = true
+    private var loadedImagePath: String? = null
+    private var customBitmap: Bitmap? = null
+    private var activeBitmap: Bitmap? = null
+    private val appIconBitmap: Bitmap? by lazy {
+        BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_foreground)
+    }
+    private val peekingCatBitmap: Bitmap? by lazy {
+        BitmapFactory.decodeResource(resources, R.drawable.dot_cat_peeking)
+    }
+    private val clipPath = Path()
+    private val drawRect = RectF()
+
     init {
         contentDescription = context.getString(R.string.dot_content_description)
         isClickable = true
@@ -53,6 +73,17 @@ class DotView(
     }
 
     fun render(state: DotUiState) {
+        isRightSide = state.isRightSide
+        isIdlePeeking = state.dotStyle == DotStyle.APP_ICON && state.isIdle
+        if (state.dotStyle == DotStyle.CUSTOM_IMAGE && loadedImagePath != state.customDotImagePath) {
+            loadedImagePath = state.customDotImagePath
+            customBitmap = state.customDotImagePath?.let { runCatching { BitmapFactory.decodeFile(it) }.getOrNull() }
+        }
+        activeBitmap = selectDotBitmap(
+            style = state.dotStyle,
+            peeking = isIdlePeeking,
+            bitmaps = Triple(peekingCatBitmap, appIconBitmap, customBitmap),
+        )
         if (!state.isVisible || state.isHiddenForCapture) {
             animate().cancel()
             colorAnimator?.cancel()
@@ -64,6 +95,8 @@ class DotView(
         } else {
             visibility = VISIBLE
             updateAlphaAndScale(state.alpha)
+            val targetTx = if (isIdlePeeking) (if (isRightSide) 1f else -1f) * width * PEEK_OFFSET_RATIO else 0f
+            animate().translationX(targetTx).setDuration(PEEK_ANIM_DURATION_MS).start()
             updateExclusionRects(true)
         }
         invalidate()
@@ -131,9 +164,24 @@ class DotView(
         val centerX = width / 2f
         val centerY = height / 2f
 
-        canvas.drawCircle(centerX, centerY, radius, outerPaint)
-        canvas.drawCircle(centerX, centerY, radius * RING_RATIO, ringPaint)
-        canvas.drawCircle(centerX, centerY, radius * CENTER_DOT_RATIO, centerPaint)
+        val bitmap = activeBitmap
+        if (bitmap != null) {
+            drawRect.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
+            clipPath.reset()
+            clipPath.addCircle(centerX, centerY, radius, Path.Direction.CW)
+            val saveCount = canvas.save()
+            if (!isIdlePeeking) {
+                canvas.clipPath(clipPath)
+            } else if (!isRightSide) {
+                canvas.scale(-1f, 1f, centerX, centerY)
+            }
+            canvas.drawBitmap(bitmap, null, drawRect, null)
+            canvas.restoreToCount(saveCount)
+        } else {
+            canvas.drawCircle(centerX, centerY, radius, outerPaint)
+            canvas.drawCircle(centerX, centerY, radius * RING_RATIO, ringPaint)
+            canvas.drawCircle(centerX, centerY, radius * CENTER_DOT_RATIO, centerPaint)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -170,5 +218,18 @@ class DotView(
         private const val DRAW_INSET_DP = 2.0f
         private const val RING_RATIO = 0.72f
         private const val CENTER_DOT_RATIO = 0.35f
+        private const val PEEK_OFFSET_RATIO = 0.25f
+        private const val PEEK_ANIM_DURATION_MS = 220L
     }
+}
+
+private fun selectDotBitmap(
+    style: DotStyle,
+    peeking: Boolean,
+    bitmaps: Triple<Bitmap?, Bitmap?, Bitmap?>,
+): Bitmap? = when {
+    peeking -> bitmaps.first
+    style == DotStyle.APP_ICON -> bitmaps.second
+    style == DotStyle.CUSTOM_IMAGE -> bitmaps.third
+    else -> null
 }

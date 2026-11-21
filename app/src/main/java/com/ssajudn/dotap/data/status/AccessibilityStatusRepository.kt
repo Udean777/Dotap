@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.onEach
 
 class AccessibilityStatusRepository(
     private val context: Context,
-    private val dispatcherProvider: DispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
     private val serviceConnectionTracker: ServiceConnectionTracker,
 ) : AccessibilityStatusSource,
     ServiceStatusRepository {

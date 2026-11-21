@@ -16,7 +16,7 @@ import java.io.IOException
 
 class DataStoreSettingsRepository(
     private val dataStore: DataStore<Preferences>,
-    private val dispatcherProvider: DispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
 ) : SettingsRepository {
     private val mapper = SettingsMapper()
 

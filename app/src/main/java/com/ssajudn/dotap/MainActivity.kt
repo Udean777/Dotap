@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
@@ -88,17 +89,37 @@ private fun MainAppContent(
             (settings.themeMode == ThemeMode.SYSTEM && isSystemInDarkTheme())
         val navController = rememberNavController()
         val localizedContext = rememberLocalizedContext(settings.appLanguage)
+        val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
         SyncSystemBars(darkTheme)
         Crossfade(targetState = localizedContext, label = "languageCrossfade") { ctx ->
-            CompositionLocalProvider(
-                LocalContext provides ctx,
-                LocalConfiguration provides ctx.resources.configuration,
-            ) {
+            LocalizedDotapContent(ctx, activityResultRegistryOwner) {
                 DotapTheme(darkTheme = darkTheme) {
                     DotapNavHost(container.screenViewModelFactories, systemActions, startDestination, navController)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LocalizedDotapContent(
+    localizedContext: Context,
+    activityResultRegistryOwner: androidx.activity.result.ActivityResultRegistryOwner?,
+    content: @Composable () -> Unit,
+) {
+    if (activityResultRegistryOwner != null) {
+        CompositionLocalProvider(
+            LocalContext provides localizedContext,
+            LocalConfiguration provides localizedContext.resources.configuration,
+            LocalActivityResultRegistryOwner provides activityResultRegistryOwner,
+            content = content,
+        )
+    } else {
+        CompositionLocalProvider(
+            LocalContext provides localizedContext,
+            LocalConfiguration provides localizedContext.resources.configuration,
+            content = content,
+        )
     }
 }
 

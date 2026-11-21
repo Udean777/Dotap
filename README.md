@@ -18,8 +18,9 @@
 - **Idle Peeking Cat Mode:** When using the App Icon style, the cat automatically peeks from the screen edge when idle and pops back out on touch.
 - **Rich Gestures:** Configure **Single Tap**, **Double Tap**, **Long Press**, and **4-way Swipe/Flick** (*Up, Down, Left, Right*) to run actions.
 - **Built-in Floating App Search:** Trigger `Search Apps` from any gesture or panel to open a blurred, auto-focused floating search bar and launch any installed app instantly.
-- **Quick Action Panel:** Customizable 3–8 slot floating panel for Screenshot, Home, Back, Recents, Notifications, Quick Settings, Lock Screen, Flashlight, and App Shortcuts.
-- **Auto-Fade & Edge Snap:** Configurable idle opacity, delay, size, haptic feedback, and automatic edge docking.
+- **Quick Action Panel:** Customizable 3–8 slot floating panel for Screenshot, Home, Back, Recents, Notifications, Quick Settings, Lock Screen, Flashlight, Open Dotap, and App Shortcuts.
+- **In-App Theme & Language:** Switch between **System / Light / Dark** themes and **System / English / Indonesian** languages in real time without restarting.
+- **Tactile Animations & Auto-Fade:** Spring-based tap/swipe feedback, edge peeking, configurable idle opacity, delay, size, haptic feedback, and automatic edge docking.
 - **Privacy First:** Zero `INTERNET` permission, zero analytics, zero screen-content reading.
 
 ## Tech Stack & Architecture
@@ -36,3 +37,7 @@
 ./gradlew assembleDebug
 ./gradlew spotlessApply testDebugUnitTest lintDebug detekt
 ```
+
+## Privacy Policy
+
+[Privacy Policy](https://ssajudn.github.io/Dotap/privacy-policy.html) ([source](docs/privacy-policy.html))

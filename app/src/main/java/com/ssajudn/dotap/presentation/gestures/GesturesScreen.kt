@@ -83,6 +83,7 @@ private fun GesturesBody(
     onEvent: (GesturesUiEvent) -> Unit,
     innerPadding: PaddingValues,
 ) {
+    if (state.isLoading) return
     Column(
         modifier = Modifier
             .fillMaxSize()

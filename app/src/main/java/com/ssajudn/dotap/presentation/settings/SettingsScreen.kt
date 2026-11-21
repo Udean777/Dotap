@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
+import com.ssajudn.dotap.domain.model.AppLanguage
+import com.ssajudn.dotap.domain.model.ThemeMode
 import com.ssajudn.dotap.presentation.common.DotapCard
 import com.ssajudn.dotap.presentation.common.DotapDivider
 import com.ssajudn.dotap.presentation.common.DotapMascot
@@ -69,6 +73,7 @@ private fun SettingsBody(
     onEvent: (SettingsUiEvent) -> Unit,
     innerPadding: PaddingValues,
 ) {
+    if (state.isLoading) return
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,9 +83,7 @@ private fun SettingsBody(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         DotapMascot(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(ScreenMascotSize),
+            modifier = Modifier.align(Alignment.CenterHorizontally).size(ScreenMascotSize),
             mascotRes = R.drawable.mascot_settings_gear,
         )
         ExpressiveSectionHeader(text = stringResource(R.string.settings_feedback_section))
@@ -88,6 +91,7 @@ private fun SettingsBody(
             isHapticsEnabled = state.settings.isHapticsEnabled,
             onHapticsToggled = { onEvent(SettingsUiEvent.HapticsToggled(it)) },
         )
+        ThemeAndLanguageCard(state.settings.themeMode, state.settings.appLanguage, onEvent)
 
         ExpressiveSectionHeader(text = stringResource(R.string.settings_behavior_section))
         BehaviorCard(items = behaviorNavigationItems(onEvent))

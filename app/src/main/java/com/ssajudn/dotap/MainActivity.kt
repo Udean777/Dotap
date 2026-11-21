@@ -1,22 +1,43 @@
 package com.ssajudn.dotap
+
+import android.app.Activity
+import android.app.LocaleManager
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.LocaleList
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
 import com.ssajudn.dotap.di.AppContainer
+import com.ssajudn.dotap.domain.model.AppLanguage
+import com.ssajudn.dotap.domain.model.DotSettings
+import com.ssajudn.dotap.domain.model.ThemeMode
 import com.ssajudn.dotap.presentation.common.LocalAppIconLoader
 import com.ssajudn.dotap.presentation.navigation.Destinations
 import com.ssajudn.dotap.presentation.navigation.DotapNavHost
 import com.ssajudn.dotap.presentation.navigation.SystemActions
 import com.ssajudn.dotap.presentation.theme.DotapTheme
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,12 +85,49 @@ private fun MainAppContent(
         Destinations.ONBOARDING
     }
     CompositionLocalProvider(LocalAppIconLoader provides container.appIconLoader) {
-        DotapTheme {
-            DotapNavHost(
-                factories = container.screenViewModelFactories,
-                systemActions = systemActions,
-                startDestination = startDestination,
-            )
+        val settings by container.settingsRepository.settings.collectAsStateWithLifecycle(
+            initialValue = DotSettings.Default,
+        )
+        val darkTheme = settings.themeMode == ThemeMode.DARK ||
+            (settings.themeMode == ThemeMode.SYSTEM && isSystemInDarkTheme())
+        val navController = rememberNavController()
+        val localizedContext = rememberLocalizedContext(settings.appLanguage)
+        SyncSystemBars(darkTheme)
+        Crossfade(targetState = localizedContext, label = "languageCrossfade") { ctx ->
+            CompositionLocalProvider(
+                LocalContext provides ctx,
+                LocalConfiguration provides ctx.resources.configuration,
+            ) {
+                DotapTheme(darkTheme = darkTheme) {
+                    DotapNavHost(container.screenViewModelFactories, systemActions, startDestination, navController)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun rememberLocalizedContext(appLanguage: AppLanguage): Context {
+    val baseContext = LocalContext.current
+    val baseConfig = LocalConfiguration.current
+    return remember(appLanguage, baseConfig) {
+        val tag = appLanguage.tag
+        if (tag == null) {
+            baseContext
+        } else {
+            val config = Configuration(baseConfig).apply { setLocale(Locale.forLanguageTag(tag)) }
+            baseContext.createConfigurationContext(config)
+        }
+    }
+}
+
+@Composable
+private fun SyncSystemBars(darkTheme: Boolean) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    SideEffect {
+        (context as? Activity)?.window?.let { window ->
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 }

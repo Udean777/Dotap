@@ -154,4 +154,12 @@
     <string name="onboarding_next">Next</string>
     <string name="action_open_dotap">Open Dotap</string>
     <string name="action_picker_search_hint">Search actions…</string>
+    <string name="settings_theme_label">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_language_label">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_english">English</string>
+    <string name="language_indonesian">Indonesia</string>
 </resources>

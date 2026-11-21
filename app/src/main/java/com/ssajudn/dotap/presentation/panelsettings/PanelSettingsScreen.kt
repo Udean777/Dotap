@@ -92,6 +92,7 @@ private fun PanelSettingsBody(
     onEvent: (PanelSettingsUiEvent) -> Unit,
     innerPadding: PaddingValues,
 ) {
+    if (state.isLoading) return
     Column(
         modifier = Modifier
             .fillMaxSize()

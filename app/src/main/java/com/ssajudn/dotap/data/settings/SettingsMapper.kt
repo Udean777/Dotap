@@ -3,10 +3,12 @@ package com.ssajudn.dotap.data.settings
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import com.ssajudn.dotap.domain.model.ActionType
+import com.ssajudn.dotap.domain.model.AppLanguage
 import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.DotStyle
 import com.ssajudn.dotap.domain.model.Limits
 import com.ssajudn.dotap.domain.model.PanelSlot
+import com.ssajudn.dotap.domain.model.ThemeMode
 
 /**
  * Translates between [Preferences] and [DotSettings]. Unknown or out-of-range stored values fall back
@@ -40,7 +42,7 @@ internal class SettingsMapper {
             isOnboardingCompleted = preferences.value(SettingsKeys.ONBOARDING_COMPLETED, d.isOnboardingCompleted),
             dotStyle = toDotStyle(preferences[SettingsKeys.DOT_STYLE], d.dotStyle),
             customDotImagePath = preferences[SettingsKeys.CUSTOM_DOT_IMAGE_PATH]?.takeIf { it.isNotBlank() },
-        ).withClampedValues()
+        ).withClampedValues().withThemeAndLanguage(preferences)
     }
 
     private fun DotSettings.withClampedValues(): DotSettings = this
@@ -75,6 +77,8 @@ internal class SettingsMapper {
         preferences[SettingsKeys.ONBOARDING_COMPLETED] = settings.isOnboardingCompleted
         preferences[SettingsKeys.DOT_STYLE] = settings.dotStyle.name
         writeOptionalString(preferences, SettingsKeys.CUSTOM_DOT_IMAGE_PATH, settings.customDotImagePath)
+        preferences[SettingsKeys.THEME_MODE] = settings.themeMode.name
+        preferences[SettingsKeys.APP_LANGUAGE] = settings.appLanguage.name
     }
 
     private fun writeOptionalString(
@@ -138,3 +142,18 @@ private fun toDotStyle(
     stored: String?,
     fallback: DotStyle,
 ): DotStyle = DotStyle.entries.firstOrNull { it.name == stored } ?: fallback
+
+private fun toThemeMode(
+    stored: String?,
+    fallback: ThemeMode,
+): ThemeMode = ThemeMode.entries.firstOrNull { it.name == stored } ?: fallback
+
+private fun toAppLanguage(
+    stored: String?,
+    fallback: AppLanguage,
+): AppLanguage = AppLanguage.entries.firstOrNull { it.name == stored } ?: fallback
+
+private fun DotSettings.withThemeAndLanguage(preferences: Preferences): DotSettings = copy(
+    themeMode = toThemeMode(preferences[SettingsKeys.THEME_MODE], DotSettings.Default.themeMode),
+    appLanguage = toAppLanguage(preferences[SettingsKeys.APP_LANGUAGE], DotSettings.Default.appLanguage),
+)

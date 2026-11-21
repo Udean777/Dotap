@@ -84,6 +84,7 @@ private fun AppearanceBody(
     onPickImageClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (state.isLoading) return
     Column(
         modifier = modifier
             .fillMaxSize()

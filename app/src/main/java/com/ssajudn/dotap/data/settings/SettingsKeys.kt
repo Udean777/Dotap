@@ -30,6 +30,8 @@ internal object SettingsKeys {
     val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     val DOT_STYLE = stringPreferencesKey("dot_style")
     val CUSTOM_DOT_IMAGE_PATH = stringPreferencesKey("custom_dot_image_path")
+    val THEME_MODE = stringPreferencesKey("theme_mode")
+    val APP_LANGUAGE = stringPreferencesKey("app_language")
 }
 
 internal const val SIDE_RIGHT = "RIGHT"

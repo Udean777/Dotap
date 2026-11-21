@@ -22,6 +22,7 @@ class OverlayController(
     private var dotView: DotView? = null
     private var layoutParams: WindowManager.LayoutParams? = null
     private var snapAnimator: ValueAnimator? = null
+    private val touchHandler = DotTouchHandler(presenter) { gestureEngine }
     var gestureEngine: GestureEngine? = null
     var accessibilityClick: (() -> Unit)? = null
     var accessibilityLongClick: (() -> Unit)? = null
@@ -45,7 +46,7 @@ class OverlayController(
 
         val view = DotView(
             context = context,
-            onTouchListener = { _, event -> handleTouchEvent(event, presenter, gestureEngine) },
+            onTouchListener = touchHandler::onTouch,
             actions = DotView.ClickActions(
                 onClick = { accessibilityClick?.invoke() },
                 onLongClick = { accessibilityLongClick?.invoke() },

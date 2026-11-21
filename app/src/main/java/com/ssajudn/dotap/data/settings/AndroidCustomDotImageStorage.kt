@@ -3,8 +3,9 @@ package com.ssajudn.dotap.data.settings
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
+import androidx.core.graphics.scale
+import androidx.core.net.toUri
 import com.ssajudn.dotap.domain.port.CustomDotImageStorage
 import com.ssajudn.dotap.domain.port.DispatcherProvider
 import kotlinx.coroutines.withContext
@@ -20,7 +21,7 @@ internal class AndroidCustomDotImageStorage(
     private val dispatchers: DispatcherProvider,
 ) : CustomDotImageStorage {
     override suspend fun saveFromUri(uriString: String): String? = withContext(dispatchers.io) {
-        val uri = runCatching { Uri.parse(uriString) }.getOrNull() ?: return@withContext null
+        val uri = runCatching { uriString.toUri() }.getOrNull() ?: return@withContext null
         val decoded = context.contentResolver.openInputStream(uri)?.use { stream ->
             BitmapFactory.decodeStream(stream)
         } ?: return@withContext null
@@ -53,6 +54,6 @@ internal class AndroidCustomDotImageStorage(
         val ratio = MAX_CUSTOM_DOT_PX.toFloat() / maxDim.toFloat()
         val width = (bitmap.width * ratio).toInt().coerceAtLeast(1)
         val height = (bitmap.height * ratio).toInt().coerceAtLeast(1)
-        return Bitmap.createScaledBitmap(bitmap, width, height, true)
+        return bitmap.scale(width, height)
     }
 }

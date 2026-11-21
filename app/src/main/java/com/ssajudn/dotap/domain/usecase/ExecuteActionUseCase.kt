@@ -35,6 +35,8 @@ class ExecuteActionUseCase(
             ActionResult.Success
         }
 
+        ActionType.OPEN_DOTAP -> launchApp("com.ssajudn.dotap")
+
         ActionType.FLASHLIGHT -> toggleFlashlight()
 
         ActionType.LAUNCH_APP -> launchApp(appPackage)

@@ -198,10 +198,12 @@ private fun PanelActionCell(
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
         ) {
-            if (slot.action == ActionType.LAUNCH_APP) {
-                LaunchAppCellContent(slot.appPackage, appLabel, contentLabel)
-            } else {
-                Icon(
+            when (slot.action) {
+                ActionType.LAUNCH_APP -> LaunchAppCellContent(slot.appPackage, appLabel, contentLabel)
+
+                ActionType.OPEN_DOTAP -> LaunchAppCellContent("com.ssajudn.dotap", contentLabel, contentLabel)
+
+                else -> Icon(
                     painter = painterResource(iconRes),
                     contentDescription = contentLabel,
                     modifier = Modifier.size(CELL_ICON_SIZE_DP.dp),

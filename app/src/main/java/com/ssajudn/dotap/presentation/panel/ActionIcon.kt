@@ -20,4 +20,5 @@ private val ICONS: Map<ActionType, Int> = mapOf(
     ActionType.FLASHLIGHT to R.drawable.ic_panel_flashlight,
     ActionType.LAUNCH_APP to R.drawable.ic_panel_launch_app,
     ActionType.SEARCH_APPS to R.drawable.ic_panel_launch_app,
+    ActionType.OPEN_DOTAP to R.drawable.ic_panel_launch_app,
 )

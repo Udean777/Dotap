@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.InstalledApp
 import com.ssajudn.dotap.presentation.common.AppShortcutIcon
+import com.ssajudn.dotap.presentation.common.DotapEntranceContainer
+import com.ssajudn.dotap.presentation.common.bounceOnPress
 
 @Composable
 fun AppSearchOverlayContent(
@@ -52,7 +54,9 @@ fun AppSearchOverlayContent(
             .padding(horizontal = 24.dp, vertical = 64.dp),
         contentAlignment = Alignment.TopCenter,
     ) {
-        AppSearchCard(apps = apps, onAppSelected = onAppSelected)
+        DotapEntranceContainer {
+            AppSearchCard(apps = apps, onAppSelected = onAppSelected)
+        }
     }
 }
 
@@ -126,10 +130,12 @@ private fun AppSearchResultRow(
     app: InstalledApp,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .bounceOnPress(interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),

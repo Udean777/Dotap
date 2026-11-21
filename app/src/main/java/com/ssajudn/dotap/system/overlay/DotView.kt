@@ -14,6 +14,8 @@ import android.graphics.RectF
 import android.os.Build
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.graphics.withSave
+import androidx.core.view.isVisible
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.DotStyle
 
@@ -57,7 +59,7 @@ class DotView(
     private var customBitmap: Bitmap? = null
     private var activeBitmap: Bitmap? = null
     private val appIconBitmap: Bitmap? by lazy {
-        BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_foreground)
+        BitmapFactory.decodeResource(resources, R.drawable.dot_cat_active)
     }
     private val peekingCatBitmap: Bitmap? by lazy {
         BitmapFactory.decodeResource(resources, R.drawable.dot_cat_peeking)
@@ -89,8 +91,7 @@ class DotView(
             colorAnimator?.cancel()
             visibility = GONE
             alpha = 0f
-            scaleX = 1f
-            scaleY = 1f
+            resetSwipeTransform()
             updateExclusionRects(false)
         } else {
             visibility = VISIBLE
@@ -168,14 +169,14 @@ class DotView(
             drawRect.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius)
             clipPath.reset()
             clipPath.addCircle(centerX, centerY, radius, Path.Direction.CW)
-            val saveCount = canvas.save()
-            if (!isIdlePeeking) {
-                canvas.clipPath(clipPath)
-            } else if (!isRightSide) {
-                canvas.scale(-1f, 1f, centerX, centerY)
+            canvas.withSave {
+                if (!isIdlePeeking) {
+                    clipPath(clipPath)
+                } else if (!isRightSide) {
+                    scale(-1f, 1f, centerX, centerY)
+                }
+                drawBitmap(bitmap, null, drawRect, null)
             }
-            canvas.drawBitmap(bitmap, null, drawRect, null)
-            canvas.restoreToCount(saveCount)
         } else {
             canvas.drawCircle(centerX, centerY, radius, outerPaint)
             canvas.drawCircle(centerX, centerY, radius * RING_RATIO, ringPaint)

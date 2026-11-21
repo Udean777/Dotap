@@ -25,6 +25,8 @@ data class DotSettings(
     val isOnboardingCompleted: Boolean = Defaults.ONBOARDING_COMPLETED,
     val dotStyle: DotStyle = DotStyle.DEFAULT,
     val customDotImagePath: String? = null,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val appLanguage: AppLanguage = AppLanguage.SYSTEM,
 ) {
     /** Idle opacity as a 0..1 alpha; 100% is the upper limit and means no fading. */
     val idleAlpha: Float get() = idleOpacityPercent.toFloat() / Limits.MAX_IDLE_OPACITY_PERCENT

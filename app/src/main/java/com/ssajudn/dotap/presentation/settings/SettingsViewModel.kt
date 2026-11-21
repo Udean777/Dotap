@@ -35,6 +35,14 @@ class SettingsViewModel(
                     it.copy(isHapticsEnabled = event.enabled)
                 }
 
+                is SettingsUiEvent.ThemeModeSelected -> settingsRepository.update {
+                    it.copy(themeMode = event.mode)
+                }
+
+                is SettingsUiEvent.LanguageSelected -> settingsRepository.update {
+                    it.copy(appLanguage = event.language)
+                }
+
                 SettingsUiEvent.OpenGesturesClicked -> _uiEffect.send(SettingsUiEffect.NavigateToGestures)
 
                 SettingsUiEvent.OpenAppearanceClicked -> _uiEffect.send(SettingsUiEffect.NavigateToAppearance)

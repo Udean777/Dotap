@@ -32,8 +32,8 @@ fun DotapNavHost(
     factories: ScreenViewModelFactories,
     systemActions: SystemActions,
     startDestination: String = Destinations.HOME,
+    navController: NavHostController = rememberNavController(),
 ) {
-    val navController = rememberNavController()
     NavHost(
         navController = navController,
         startDestination = startDestination,

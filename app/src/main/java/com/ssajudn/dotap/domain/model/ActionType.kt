@@ -16,6 +16,7 @@ enum class ActionType(val canBePanelSlot: Boolean = true) {
     FLASHLIGHT,
     LAUNCH_APP,
     SEARCH_APPS,
+    OPEN_DOTAP,
     OPEN_PANEL(canBePanelSlot = false),
     NONE(canBePanelSlot = false),
 }

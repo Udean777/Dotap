@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.OemBrand
+import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.common.DotapTopAppBar
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 

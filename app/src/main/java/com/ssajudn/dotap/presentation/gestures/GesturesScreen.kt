@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,9 +25,11 @@ import com.ssajudn.dotap.presentation.common.AppPickerBottomSheet
 import com.ssajudn.dotap.presentation.common.AppPickerState
 import com.ssajudn.dotap.presentation.common.DotapCard
 import com.ssajudn.dotap.presentation.common.DotapDivider
+import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.common.DotapTopAppBar
 import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledStepSlider
+import com.ssajudn.dotap.presentation.common.ScreenMascotSize
 import com.ssajudn.dotap.presentation.common.StepSliderSpec
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
@@ -79,6 +83,7 @@ private fun GesturesBody(
     onEvent: (GesturesUiEvent) -> Unit,
     innerPadding: PaddingValues,
 ) {
+    if (state.isLoading) return
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,6 +92,12 @@ private fun GesturesBody(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        DotapMascot(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .size(ScreenMascotSize),
+            mascotRes = R.drawable.mascot_onboarding_gestures,
+        )
         ExpressiveSectionHeader(text = stringResource(R.string.gestures_actions_section))
         GestureActionsCard(state = state, onEvent = onEvent)
 

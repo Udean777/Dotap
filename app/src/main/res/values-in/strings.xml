@@ -1,24 +1,24 @@
 <resources>
     <string name="app_name">Dotap</string>
     <string name="service_label">Layanan Aksesibilitas Dotap</string>
-    <string name="service_description">Menampilkan overlay dot melayang untuk pintasan navigasi satu tangan dan tangkapan layar tanpa mengumpulkan konten layar atau data pribadi.</string>
+    <string name="service_description">Menampilkan tombol dot mengambang untuk pintasan navigasi satu tangan dan screenshot, tanpa membaca isi layar atau data pribadi.</string>
 
     <string name="home_title">Dotap</string>
     <string name="status_enabled">Layanan Aktif</string>
     <string name="status_disabled">Layanan Tidak Aktif</string>
     <string name="enable_service_button">Aktifkan di Pengaturan Aksesibilitas</string>
-    <string name="dot_content_description">Dot melayang</string>
+    <string name="dot_content_description">Tombol dot</string>
     <string name="settings_button">Pengaturan</string>
 
     <string name="settings_title">Pengaturan</string>
     <string name="back_button">Kembali</string>
-    <string name="settings_feedback_section">Umpan Balik</string>
-    <string name="settings_behavior_section">Perilaku</string>
-    <string name="haptics_label">Umpan balik haptic</string>
+    <string name="settings_feedback_section">Sentuhan &amp; Getar</string>
+    <string name="settings_behavior_section">Pengaturan Dot</string>
+    <string name="haptics_label">Getaran sentuhan</string>
     <string name="gestures_title">Gestur</string>
     <string name="gestures_summary">Aksi untuk tiap gestur dan waktunya</string>
     <string name="appearance_title">Tampilan</string>
-    <string name="appearance_summary">Visibilitas dot dan penempelan ke tepi</string>
+    <string name="appearance_summary">Tampilan dot dan posisi tepi layar</string>
     <string name="gesture_single_tap_label">Ketuk sekali</string>
     <string name="gesture_double_tap_label">Ketuk dua kali</string>
     <string name="gesture_long_press_label">Tekan lama</string>
@@ -29,10 +29,10 @@
     <string name="snap_to_edge_label">Tempel ke tepi layar</string>
     <string name="dot_size_label">Ukuran dot</string>
     <string name="dot_size_value">%1$d dp</string>
-    <string name="idle_opacity_label">Opasitas saat idle</string>
+    <string name="idle_opacity_label">Transparansi saat diam</string>
     <string name="idle_opacity_value">%1$d%%</string>
 
-    <string name="action_screenshot">Tangkapan Layar</string>
+    <string name="action_screenshot">Screenshot</string>
     <string name="action_home">Home</string>
     <string name="action_back">Kembali</string>
     <string name="action_recents">Aplikasi Terakhir</string>
@@ -45,7 +45,7 @@
     <string name="action_open_panel">Buka Panel</string>
     <string name="action_none">Tidak Ada</string>
 
-    <string name="screenshot_unavailable">Tangkapan layar tidak tersedia di perangkat ini</string>
+    <string name="screenshot_unavailable">Screenshot tidak tersedia di perangkat ini</string>
     <string name="flashlight_unavailable">Senter tidak tersedia di perangkat ini</string>
     <string name="app_not_configured">Belum ada aplikasi yang dipilih untuk pintasan ini</string>
     <string name="app_launch_failed">Tidak dapat membuka aplikasi yang dipilih</string>
@@ -53,11 +53,11 @@
     <string name="panel_close">Tutup</string>
 
     <string name="onboarding_intro_title">Selamat Datang di Dotap</string>
-    <string name="onboarding_intro_desc">Dot pintasan melayang yang cepat dan privat untuk meletakkan aksi sistem penting dan tangkapan layar tepat di ujung jari Anda.</string>
+    <string name="onboarding_intro_desc">Pintasan dot cepat dan privat untuk mengakses aksi penting dan screenshot langsung dari ujung jari Anda.</string>
     <string name="onboarding_get_started">Mulai</string>
     <string name="onboarding_disclosure_title">Mengapa Dotap Memerlukan Layanan Aksesibilitas</string>
     <string name="onboarding_disclosure_purpose_title">Tujuan Layanan</string>
-    <string name="onboarding_disclosure_purpose_desc">Dotap menggunakan AccessibilityService API Android hanya untuk:\n• Menampilkan tombol dot pintasan melayang di atas aplikasi lain.\n• Menjalankan tindakan sistem yang Anda picu, seperti mengambil tangkapan layar, kembali ke Home, Back, atau membuka Notifikasi.</string>
+    <string name="onboarding_disclosure_purpose_desc">Dotap menggunakan AccessibilityService API Android hanya untuk:\n• Menampilkan tombol dot pintasan melayang di atas aplikasi lain.\n• Menjalankan tindakan sistem yang Anda picu, seperti mengambil screenshot, kembali ke Home, Back, atau membuka Notifikasi.</string>
     <string name="onboarding_disclosure_privacy_title">Jaminan Privasi</string>
     <string name="onboarding_disclosure_privacy_desc">• Dotap TIDAK PERNAH membaca, merekam, atau mengirimkan konten layar, teks yang diketik, atau data pribadi Anda.\n• Dotap beroperasi sepenuhnya secara offline tanpa izin internet.</string>
     <string name="onboarding_agree_button">Setuju &amp; Lanjutkan</string>
@@ -78,7 +78,7 @@
     <string name="settings_troubleshooting_section">Pemecahan Masalah</string>
     <string name="battery_guidance_title">Pengoptimalan baterai</string>
     <string name="battery_guidance_summary">Cegah sistem mematikan dot melayang di latar belakang</string>
-    <string name="battery_guidance_intro">Beberapa produsen perangkat menutup aplikasi overlay di latar belakang untuk hemat daya. Ikuti langkah untuk perangkat Anda agar Dotap tetap aktif.</string>
+    <string name="battery_guidance_intro">Beberapa merek HP menutup aplikasi overlay di latar belakang untuk hemat baterai. Ikuti langkah untuk perangkat Anda agar Dotap tetap aktif.</string>
     <string name="battery_open_settings_button">Buka Pengaturan Baterai</string>
     <string name="battery_view_online_guide">Panduan Online (dontkillmyapp.com)</string>
     <string name="battery_brand_current_chip">%1$s • Perangkat Anda</string>
@@ -97,13 +97,13 @@
     <string name="status_enabled_desc">Dot melayang aktif dan siap di atas layar Anda.</string>
     <string name="status_disabled_desc">Aktifkan aksesibilitas untuk menampilkan dot melayang dan pintasan.</string>
     <string name="status_not_connected_desc">Layanan aktif di setelan Android tetapi belum terhubung. Coba matikan lalu nyalakan.</string>
-    <string name="dot_preview_label">Pratinjau Dot Langsung</string>
-    <string name="dot_preview_desc">Pratinjau visual ukuran dan opasitas saat idle</string>
+    <string name="dot_preview_label">Preview Dot</string>
+    <string name="dot_preview_desc">Preview ukuran dan transparansi saat diam</string>
     <string name="home_section_customize">Kustomisasi Dotap</string>
     <string name="home_section_controls">Kontrol</string>
-    <string name="appearance_preview_section">Pratinjau Langsung</string>
-    <string name="appearance_behavior_section">Perilaku</string>
-    <string name="appearance_dimensions_section">Ukuran &amp; Opasitas</string>
+    <string name="appearance_preview_section">Preview</string>
+    <string name="appearance_behavior_section">Perilaku Dot</string>
+    <string name="appearance_dimensions_section">Ukuran &amp; Transparansi</string>
     <string name="gestures_actions_section">Aksi</string>
     <string name="gestures_timing_section">Waktu</string>
     <string name="accessibility_icon_desc">Aksesibilitas</string>
@@ -113,7 +113,7 @@
     <string name="panel_settings_title">Panel Aksi Cepat</string>
     <string name="panel_settings_summary">Atur urutan, tambah, dan hapus pintasan panel</string>
     <string name="panel_settings_reset">Reset</string>
-    <string name="panel_preview_title">Pratinjau Langsung</string>
+    <string name="panel_preview_title">Preview</string>
     <string name="panel_slot_count">%1$d / %2$d slot</string>
     <string name="panel_active_slots_section">Slot Aktif</string>
     <string name="panel_active_slots_hint">Atur 3 hingga 8 aksi yang tampil di panel cepat</string>
@@ -138,13 +138,28 @@
     <string name="dot_style_app_icon">Ikon Aplikasi</string>
     <string name="dot_style_custom_image">Gambar Sendiri</string>
     <string name="dot_style_pick_image">Pilih Gambar</string>
-    <string name="dot_style_image_error">Gagal memuat gambar yang dipilih. Coba foto lain.</string>
+    <string name="dot_style_image_error">Gambar gagal dimuat. Coba pilih foto lain.</string>
     <string name="gesture_swipe_up_label">Geser ke Atas</string>
     <string name="gesture_swipe_down_label">Geser ke Bawah</string>
     <string name="gesture_swipe_left_label">Geser ke Kiri</string>
     <string name="gesture_swipe_right_label">Geser ke Kanan</string>
     <string name="action_search_apps">Cari Aplikasi</string>
-    <string name="app_search_hint">Cari aplikasi untuk dibuka…</string>
+    <string name="app_search_hint">Cari aplikasi…</string>
     <string name="app_search_empty">Tidak ada aplikasi yang cocok</string>
     <string name="app_search_close_desc">Tutup pencarian aplikasi</string>
+    <string name="onboarding_slide2_title">Ketuk, Geser, atau Cari</string>
+    <string name="onboarding_slide2_desc">Ambil screenshot, buka aplikasi favorit, atau cari aplikasi instan hanya dengan satu gestur.</string>
+    <string name="onboarding_slide3_title">100% Offline &amp; Privat</string>
+    <string name="onboarding_slide3_desc">Tanpa izin internet, tanpa analitik, dan tanpa membaca isi layar. Semuanya berjalan langsung di perangkat Anda.</string>
+    <string name="onboarding_next">Lanjut</string>
+    <string name="action_open_dotap">Buka Dotap</string>
+    <string name="action_picker_search_hint">Cari aksi…</string>
+    <string name="settings_theme_label">Tema</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Terang</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="settings_language_label">Bahasa</string>
+    <string name="language_system">Sistem</string>
+    <string name="language_english">English</string>
+    <string name="language_indonesian">Indonesia</string>
 </resources>

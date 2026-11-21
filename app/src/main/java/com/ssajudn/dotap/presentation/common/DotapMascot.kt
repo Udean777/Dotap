@@ -13,16 +13,20 @@ import androidx.compose.ui.unit.dp
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
+val ScreenMascotSize = 160.dp
+val CardMascotSize = 104.dp
+
 /**
  * Displays the Dotap cat mascot illustration.
  */
 @Composable
 fun DotapMascot(
     modifier: Modifier = Modifier,
+    mascotRes: Int = R.drawable.mascot_dotap_cat,
     contentDescription: String? = stringResource(R.string.mascot_cd_dotap),
 ) {
     Image(
-        painter = painterResource(id = R.drawable.mascot_dotap_cat),
+        painter = painterResource(id = mascotRes),
         contentDescription = contentDescription,
         modifier = modifier,
         contentScale = ContentScale.Fit,

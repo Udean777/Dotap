@@ -3,6 +3,7 @@ package com.ssajudn.dotap.presentation.gestures
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ssajudn.dotap.domain.model.ActionType
+import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.GestureType
 import com.ssajudn.dotap.domain.port.DispatcherProvider
 import com.ssajudn.dotap.domain.repository.InstalledAppsRepository
@@ -103,10 +104,10 @@ class GesturesViewModel(
 }
 
 private fun applyGestureAction(
-    current: com.ssajudn.dotap.domain.model.DotSettings,
+    current: DotSettings,
     gesture: GestureType,
     action: ActionType,
-): com.ssajudn.dotap.domain.model.DotSettings = when (gesture) {
+): DotSettings = when (gesture) {
     GestureType.SINGLE_TAP -> current.copy(singleTapAction = action)
     GestureType.DOUBLE_TAP -> current.copy(doubleTapAction = action)
     GestureType.LONG_PRESS -> current.copy(longPressAction = action)

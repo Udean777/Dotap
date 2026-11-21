@@ -14,6 +14,8 @@ import androidx.compose.ui.platform.ComposeView
 import com.ssajudn.dotap.domain.port.PanelLauncher
 import com.ssajudn.dotap.presentation.panel.PanelDimensions
 
+private const val PANEL_BOTTOM_GUARD_DP = 48
+
 /**
  * Shows the quick-action panel as an accessibility overlay window and owns its lifecycle.
  *
@@ -106,7 +108,7 @@ class PanelHost(
         val sidePx = (PanelDimensions.SIDE_DP * density).toInt()
         val screen = getScreenSize(windowManager)
         val placement = PanelPlacement(
-            panel = PanelPlacement.Size(width = sidePx, height = sidePx),
+            panel = PanelPlacement.Size(width = sidePx, height = sidePx + context.dpToPx(PANEL_BOTTOM_GUARD_DP)),
             screen = PanelPlacement.Size(width = screen.x, height = screen.y),
             gap = (PanelDimensions.ANCHOR_GAP_DP * density).toInt(),
         )

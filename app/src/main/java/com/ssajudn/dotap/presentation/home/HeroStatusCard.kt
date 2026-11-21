@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.domain.model.ServiceStatus
+import com.ssajudn.dotap.presentation.common.CardMascotSize
 import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.common.ExpressiveIconBadge
 
@@ -79,7 +80,7 @@ private fun StatusHeroRow(serviceStatus: ServiceStatus) {
             StatusHeader(serviceStatus = serviceStatus)
             StatusDescription(serviceStatus = serviceStatus)
         }
-        DotapMascot(modifier = Modifier.size(72.dp))
+        DotapMascot(modifier = Modifier.size(CardMascotSize))
     }
 }
 

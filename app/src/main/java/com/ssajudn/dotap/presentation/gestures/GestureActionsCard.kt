@@ -251,11 +251,23 @@ private fun ExposedDropdownMenuBoxScope.ActionMenu(
     onSelected: (ActionType) -> Unit,
 ) {
     ExposedDropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        var query by remember { mutableStateOf("") }
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            placeholder = { Text(stringResource(R.string.action_picker_search_hint)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+        )
+        val trimmed = query.trim()
         SELECTABLE_ACTIONS.forEach { action ->
-            DropdownMenuItem(
-                text = { Text(text = stringResource(action.labelRes())) },
-                onClick = { onSelected(action) },
-            )
+            val label = stringResource(action.labelRes())
+            if (trimmed.isEmpty() || label.contains(trimmed, ignoreCase = true)) {
+                DropdownMenuItem(
+                    text = { Text(text = label) },
+                    onClick = { onSelected(action) },
+                )
+            }
         }
     }
 }

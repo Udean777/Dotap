@@ -158,9 +158,10 @@ private fun MiniActionCell(
         modifier = Modifier.size(PREVIEW_CELL_SIZE_DP.dp),
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            if (slot.action == ActionType.LAUNCH_APP) {
+            if (slot.action == ActionType.LAUNCH_APP || slot.action == ActionType.OPEN_DOTAP) {
+                val pkg = if (slot.action == ActionType.OPEN_DOTAP) "com.ssajudn.dotap" else slot.appPackage
                 AppShortcutIcon(
-                    packageName = slot.appPackage,
+                    packageName = pkg,
                     contentDescription = contentLabel,
                     modifier = Modifier.size(PREVIEW_ICON_SIZE_DP.dp),
                 )

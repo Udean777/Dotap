@@ -1,6 +1,7 @@
 package com.ssajudn.dotap.di
 
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -135,7 +136,7 @@ class AppContainer(
             initializer {
                 BatteryGuidanceViewModel(
                     dispatcherProvider = dispatcherProvider,
-                    deviceManufacturer = android.os.Build.MANUFACTURER,
+                    deviceManufacturer = Build.MANUFACTURER,
                 )
             }
         }

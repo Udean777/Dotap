@@ -211,9 +211,10 @@ private fun ActionRowLeadingIcon(
     action: ActionType,
     appPackage: String?,
 ) {
-    if (action == ActionType.LAUNCH_APP && !appPackage.isNullOrBlank()) {
+    val pkg = if (action == ActionType.OPEN_DOTAP) "com.ssajudn.dotap" else appPackage
+    if ((action == ActionType.LAUNCH_APP || action == ActionType.OPEN_DOTAP) && !pkg.isNullOrBlank()) {
         AppShortcutIcon(
-            packageName = appPackage,
+            packageName = pkg,
             contentDescription = null,
             modifier = Modifier.size(ROW_ICON_BADGE_DP.dp),
         )

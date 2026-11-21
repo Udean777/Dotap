@@ -19,6 +19,7 @@ private val LABELS: Map<ActionType, Int> = mapOf(
     ActionType.FLASHLIGHT to R.string.action_flashlight,
     ActionType.LAUNCH_APP to R.string.action_launch_app,
     ActionType.SEARCH_APPS to R.string.action_search_apps,
+    ActionType.OPEN_DOTAP to R.string.action_open_dotap,
     ActionType.OPEN_PANEL to R.string.action_open_panel,
     ActionType.NONE to R.string.action_none,
 )

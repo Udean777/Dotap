@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
@@ -38,22 +39,21 @@ internal class AppSearchHost(
         val composeView = ComposeView(context).apply {
             setViewTreeLifecycleOwner(owner)
             setViewTreeSavedStateRegistryOwner(owner)
+            setOnKeyListener { _, keyCode, event ->
+                val isBack = keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP
+                if (isBack) onDismiss()
+                isBack
+            }
             setContent {
                 CompositionLocalProvider(LocalAppIconLoader provides appIconLoader) {
                     DotapTheme {
-                        AppSearchOverlayContent(
-                            apps = apps,
-                            onAppSelected = onAppSelected,
-                            onDismiss = onDismiss,
-                        )
+                        AppSearchOverlayContent(apps, onAppSelected, onDismiss)
                     }
                 }
             }
         }
         owner.start()
-        val added = runCatching {
-            windowManager.addView(composeView, createLayoutParams())
-        }.isSuccess
+        val added = runCatching { windowManager.addView(composeView, createLayoutParams()) }.isSuccess
         if (added) {
             lifecycleOwner = owner
             view = composeView
@@ -64,10 +64,11 @@ internal class AppSearchHost(
 
     fun hide() {
         val currentView = view ?: return
-        runCatching { windowManager.removeView(currentView) }
+        view = null
+        currentView.disposeComposition()
+        runCatching { windowManager.removeViewImmediate(currentView) }
         lifecycleOwner?.destroy()
         lifecycleOwner = null
-        view = null
     }
 
     private fun createLayoutParams(): WindowManager.LayoutParams {

@@ -147,4 +147,11 @@
     <string name="app_search_hint">Search apps to open…</string>
     <string name="app_search_empty">No matching apps</string>
     <string name="app_search_close_desc">Close app search</string>
+    <string name="onboarding_slide2_title">Tap, Swipe, or Search</string>
+    <string name="onboarding_slide2_desc">Trigger screenshots, open your favorite apps, or launch instant app search with a single gesture.</string>
+    <string name="onboarding_slide3_title">100% Offline &amp; Private</string>
+    <string name="onboarding_slide3_desc">No internet permission, no analytics, and no screen reading. Everything stays on your device.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="action_open_dotap">Open Dotap</string>
+    <string name="action_picker_search_hint">Search actions…</string>
 </resources>

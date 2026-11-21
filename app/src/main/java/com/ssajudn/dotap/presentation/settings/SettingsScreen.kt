@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,12 +23,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ssajudn.dotap.R
 import com.ssajudn.dotap.presentation.common.DotapCard
 import com.ssajudn.dotap.presentation.common.DotapDivider
+import com.ssajudn.dotap.presentation.common.DotapMascot
 import com.ssajudn.dotap.presentation.common.DotapTopAppBar
 import com.ssajudn.dotap.presentation.common.ExpressiveIconBadge
 import com.ssajudn.dotap.presentation.common.ExpressiveNavigationRow
 import com.ssajudn.dotap.presentation.common.ExpressiveSectionHeader
 import com.ssajudn.dotap.presentation.common.LabeledSwitchRow
 import com.ssajudn.dotap.presentation.common.NavigationItem
+import com.ssajudn.dotap.presentation.common.ScreenMascotSize
 import com.ssajudn.dotap.presentation.theme.DotapTheme
 
 @Composable
@@ -73,6 +77,12 @@ private fun SettingsBody(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        DotapMascot(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .size(ScreenMascotSize),
+            mascotRes = R.drawable.mascot_settings_gear,
+        )
         ExpressiveSectionHeader(text = stringResource(R.string.settings_feedback_section))
         FeedbackCard(
             isHapticsEnabled = state.settings.isHapticsEnabled,

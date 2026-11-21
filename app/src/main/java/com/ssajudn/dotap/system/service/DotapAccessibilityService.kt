@@ -1,9 +1,11 @@
 package com.ssajudn.dotap.system.service
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.view.ViewConfiguration
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,6 +32,7 @@ import com.ssajudn.dotap.system.overlay.DotPresenter
 import com.ssajudn.dotap.system.overlay.HandlerScheduler
 import com.ssajudn.dotap.system.overlay.OverlayController
 import com.ssajudn.dotap.system.overlay.PanelHost
+import com.ssajudn.dotap.system.overlay.playTapFeedback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -133,7 +136,7 @@ class DotapAccessibilityService : AccessibilityService() {
                 PanelViewModel(
                     settingsRepository = app.container.settingsRepository,
                     installedAppsRepository = app.container.installedAppsRepository,
-                    executeAction = checkNotNull(executeActionProvider()) { "executeAction not initialized" },
+                    executeAction = executeActionProvider() ?: error("executeAction not initialized"),
                     actionScope = scope,
                     dispatcherProvider = app.container.dispatcherProvider,
                 )
@@ -157,9 +160,20 @@ class DotapAccessibilityService : AccessibilityService() {
         touchSlopPx: Float,
     ): GestureEngine {
         val listener = object : GestureListener {
-            override fun onSingleTap() = dotPresenter.onGesture(GestureType.SINGLE_TAP)
-            override fun onDoubleTap() = dotPresenter.onGesture(GestureType.DOUBLE_TAP)
-            override fun onLongPress() = dotPresenter.onGesture(GestureType.LONG_PRESS)
+            override fun onSingleTap() {
+                overlayController?.view?.let { playTapFeedback(it, GestureType.SINGLE_TAP) }
+                dotPresenter.onGesture(GestureType.SINGLE_TAP)
+            }
+
+            override fun onDoubleTap() {
+                overlayController?.view?.let { playTapFeedback(it, GestureType.DOUBLE_TAP) }
+                dotPresenter.onGesture(GestureType.DOUBLE_TAP)
+            }
+
+            override fun onLongPress() {
+                overlayController?.view?.let { playTapFeedback(it, GestureType.LONG_PRESS) }
+                dotPresenter.onGesture(GestureType.LONG_PRESS)
+            }
             override fun onDragStart() = controller.onDragStart()
             override fun onDrag(dx: Float, dy: Float) = controller.onDrag(dx, dy)
             override fun onDragEnd() = controller.onDragEnd()
@@ -240,12 +254,12 @@ private fun updateEngineConfig(
 }
 
 private fun DotapAccessibilityService.openAppSearchOverlay(
-    scope: kotlinx.coroutines.CoroutineScope,
-    app: com.ssajudn.dotap.DotapApp,
+    scope: CoroutineScope,
+    app: DotapApp,
 ) {
     val host = AppSearchHost(
         context = this,
-        windowManager = getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager,
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager,
         appIconLoader = app.container.appIconLoader,
     )
     scope.launch(app.container.dispatcherProvider.main) {
@@ -255,7 +269,7 @@ private fun DotapAccessibilityService.openAppSearchOverlay(
             onAppSelected = { pkg ->
                 host.hide()
                 packageManager.getLaunchIntentForPackage(pkg)?.let { intent ->
-                    startActivity(intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                    startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
             },
             onDismiss = host::hide,

@@ -2,6 +2,7 @@ package com.ssajudn.dotap.domain.usecase
 
 import com.ssajudn.dotap.domain.model.ActionResult
 import com.ssajudn.dotap.domain.model.ActionType
+import com.ssajudn.dotap.domain.model.DotSettings
 import com.ssajudn.dotap.domain.model.GestureType
 import com.ssajudn.dotap.domain.port.HapticFeedback
 import com.ssajudn.dotap.domain.repository.SettingsRepository
@@ -27,7 +28,7 @@ class HandleGestureUseCase(
 
 private fun actionForGesture(
     gesture: GestureType,
-    settings: com.ssajudn.dotap.domain.model.DotSettings,
+    settings: DotSettings,
 ): ActionType = when (gesture) {
     GestureType.SINGLE_TAP -> settings.singleTapAction
     GestureType.DOUBLE_TAP -> settings.doubleTapAction

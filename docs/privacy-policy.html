@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Dotap</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff;
+      --fg: #1c1b1f;
+      --muted: #5c5b63;
+      --border: #e2e0e8;
+      --accent: #3f51b5;
+      --card: #f7f7fa;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121318;
+        --fg: #e6e6eb;
+        --muted: #a1a1aa;
+        --border: #2a2b34;
+        --accent: #8c9eff;
+        --card: #1b1c24;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem 1.25rem 4rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.65;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      line-height: 1.2;
+    }
+
+    .meta {
+      margin: 0.25rem 0 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .lang-switch {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .lang-switch button {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--fg);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    .lang-switch button[aria-pressed="true"] {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.15rem;
+    }
+
+    p, ul {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    [hidden] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Privacy Policy</h1>
+        <p class="meta">Dotap for Android &middot; Last updated: November 21, 2026</p>
+      </div>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" id="btn-en" aria-pressed="true">English</button>
+        <button type="button" id="btn-id" aria-pressed="false">Indonesia</button>
+      </div>
+    </header>
+
+    <section id="content-en" lang="en">
+      <p>
+        Dotap is an Android utility app that places a floating dot on your screen so you can
+        trigger navigation and system actions with taps, swipes, or a long press.
+      </p>
+
+      <h2>Data collection</h2>
+      <p>
+        Dotap does not collect, store, or share personal data. The app contains no analytics,
+        no advertising SDKs, and no crash-reporting services that send data off your device.
+      </p>
+
+      <h2>Network access</h2>
+      <p>
+        Dotap does not request the <code>INTERNET</code> permission. All features run locally on
+        your device.
+      </p>
+
+      <h2>AccessibilityService API</h2>
+      <p>
+        Dotap uses Android's <code>AccessibilityService</code> API for two purposes only:
+      </p>
+      <ul>
+        <li>Displaying the floating dot overlay on top of other apps.</li>
+        <li>Running the global system actions you assign to dot gestures, such as taking a screenshot, going back, opening home or recents, or opening the quick panel.</li>
+      </ul>
+      <p>
+        Dotap does not read screen content, inspect window hierarchies, log keystrokes, or
+        collect text from any app.
+      </p>
+
+      <h2>Local storage</h2>
+      <p>
+        Your gesture mappings, dot appearance settings, theme, language, and dot position are
+        saved locally on your device using AndroidX DataStore. Uninstalling the app removes all
+        saved preferences.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>
+        If this policy changes in a future update, the updated version will be published on this
+        page with a revised date.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy can be opened as an issue in the
+        <a href="https://github.com/ssajudn/Dotap/issues">Dotap GitHub repository</a>.
+      </p>
+    </section>
+
+    <section id="content-id" lang="id" hidden>
+      <p>
+        Dotap adalah aplikasi utilitas Android yang menampilkan titik mengambang di layar untuk
+        menjalankan aksi navigasi dan sistem lewat ketukan, geseran, atau tekan lama.
+      </p>
+
+      <h2>Pengumpulan data</h2>
+      <p>
+        Dotap tidak mengumpulkan, menyimpan, atau membagikan data pribadi. Aplikasi ini tidak
+        memakai analitik, SDK iklan, maupun layanan pelaporan error yang mengirim data keluar
+        dari perangkat Anda.
+      </p>
+
+      <h2>Akses jaringan</h2>
+      <p>
+        Dotap tidak meminta izin <code>INTERNET</code>. Seluruh fitur berjalan secara lokal di
+        perangkat Anda.
+      </p>
+
+      <h2>AccessibilityService API</h2>
+      <p>
+        Dotap menggunakan <code>AccessibilityService</code> API Android hanya untuk dua hal:
+      </p>
+      <ul>
+        <li>Menampilkan titik mengambang di atas aplikasi lain.</li>
+        <li>Menjalankan aksi sistem global yang Anda pasang ke gestur titik, seperti mengambil tangkapan layar, kembali, membuka beranda atau aplikasi terbaru, atau membuka panel cepat.</li>
+      </ul>
+      <p>
+        Dotap tidak membaca isi layar, memeriksa struktur tampilan aplikasi lain, mencatat
+        ketikan, atau mengambil teks dari aplikasi mana pun.
+      </p>
+
+      <h2>Penyimpanan lokal</h2>
+      <p>
+        Pengaturan gestur, tampilan titik, tema, bahasa, dan posisi titik disimpan secara lokal
+        di perangkat menggunakan AndroidX DataStore. Menghapus aplikasi akan menghapus seluruh
+        pengaturan tersebut.
+      </p>
+
+      <h2>Perubahan kebijakan</h2>
+      <p>
+        Jika kebijakan ini diperbarui pada versi mendatang, versi terbaru akan diterbitkan di
+        halaman ini beserta tanggal pembaruannya.
+      </p>
+
+      <h2>Kontak</h2>
+      <p>
+        Pertanyaan mengenai kebijakan ini dapat disampaikan melalui
+        <a href="https://github.com/ssajudn/Dotap/issues">repositori GitHub Dotap</a>.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const btnEn = document.getElementById("btn-en");
+    const btnId = document.getElementById("btn-id");
+    const contentEn = document.getElementById("content-en");
+    const contentId = document.getElementById("content-id");
+
+    function setLanguage(lang) {
+      const isId = lang === "id";
+      contentEn.hidden = isId;
+      contentId.hidden = !isId;
+      btnEn.setAttribute("aria-pressed", String(!isId));
+      btnId.setAttribute("aria-pressed", String(isId));
+      document.documentElement.lang = lang;
+    }
+
+    btnEn.addEventListener("click", () => setLanguage("en"));
+    btnId.addEventListener("click", () => setLanguage("id"));
+  </script>
+</body>
+</html>

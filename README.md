@@ -40,4 +40,4 @@
 
 ## Privacy Policy
 
-[Privacy Policy](https://ssajudn.github.io/Dotap/privacy-policy.html) ([source](docs/privacy-policy.html))
+[Privacy Policy](https://udean777.github.io/Dotap/privacy-policy.html) ([source](docs/privacy-policy.html))
